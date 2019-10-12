@@ -32,7 +32,7 @@ const args = process.argv;
 //     [12, 9, 6, 7],
 //     [11, 10, 8, 15],
 // ];
-
+//
 // const f = [
 //     [1, 2, 3, 4],
 //     [12, 13, 14, 5],
@@ -45,11 +45,13 @@ const args = process.argv;
 let solver;
 let isSolvable = false;
 while(!isSolvable) {
-    const f = generate(4);
-    solver = new Solver(f[0].length, f);
+    const f = generate(3);
+    solver = new Solver(f);
     isSolvable = solver.checkIsSolvable();
 }
 
+// solver = new Solver(f);
+// isSolvable = solver.checkIsSolvable();
 if (isSolvable) {
     const solve = solver.solve();
 }

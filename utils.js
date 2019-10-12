@@ -90,9 +90,9 @@ console.log('inversion', inversion)
     // solvable if grid length is even and
     // inversion is even and 0 line is even
     // or inversion is odd and 0 line is odd
-    const zeroPosition = Math.round(list.indexOf(0) / length);
+    const zeroPosition = Math.floor(list.indexOf(0) / length) + 1;
 console.log('zpos : ', zeroPosition)
-    return inversion % 2 !== zeroPosition % 2;
+    return inversion % 2 === zeroPosition % 2;
 
 };
 

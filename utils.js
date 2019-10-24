@@ -1,5 +1,6 @@
-const finalState = (length) => {
+const getFinalState = (length) => {
     const finalState = [];
+    let finalStateName = [];
     let direction = 'r';
     let c = 0;
     let l = 0;
@@ -10,6 +11,7 @@ const finalState = (length) => {
 
     for (let i = 1; i < length * length; i++) {
         finalState.push({c, l});
+        finalStateName[l * length + c] = i;
         switch (direction) {
             case "r": {
                 c += 1;
@@ -54,8 +56,10 @@ const finalState = (length) => {
         }
     }
     finalState.unshift({l, c});
-    console.log(finalState)
-    return finalState;
+    finalStateName[l * length + c] = 0;
+    console.log(finalState);
+    console.log(finalStateName);
+    return {finalState, name: finalStateName.join(',')};
 };
 
 const getDistance = (goal, l, c) => {
@@ -101,7 +105,7 @@ const isAtGoalPosition = (e, list, goalList) => {
 };
 
 module.exports = {
-    finalState: finalState,
+    getFinalState: getFinalState,
     isSolvable: isSolvable,
     getList: getList,
     isAtGoalPosition: isAtGoalPosition,

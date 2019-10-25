@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "strict": true,
+    "alwaysStrict": true,
+    "noImplicitAny": true,
+    "esModuleInterop": true,
+    "noUnusedParameters": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "sourceMap": true,
+    "lib": ["dom", "esnext"],
+    "typeRoots": ["./node_modules/*"],
+    "target": "esnext",
+    "baseUrl": "."
+  },
+  "include": ["**/*"],
+  "exclude": ["node_modules"]
+}

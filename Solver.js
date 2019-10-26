@@ -24,6 +24,7 @@ module.exports = class Solver {
         this.initialState = initialState;
         this.nbTry = 0;
         this.end = false;
+        this.maxNodes = 0;
         this.actualNode = {};
         this.maxS = 0;
         this.nextS = 0;
@@ -38,12 +39,13 @@ module.exports = class Solver {
         //console.log('start')
         const node = getList(this.initialState);
         const nodeName = node.join(',');
-        this.node[nodeName] = {f: 0, a: '', h: 0, array: node};
+        this.node[nodeName] = {f: 0, a: '', h: this.manhattan(node), array: node};
+        this.maxS = this.node[nodeName].h + 1;
         let start = Date.now();
 
         while (!this.end) {
 
-            this.idNode.push({f: 0, a: '', h: 0, array: node, name: nodeName});
+            this.idNode.push(this.node[nodeName]);
             this.idAStar()
             //this.aStar()
         }
@@ -75,20 +77,23 @@ module.exports = class Solver {
             this.idAStarRecursive();
         }
         //console.log(this.nextS)
-        //this.done = {};
+        this.done = {};
         this.maxS = this.nextS;
         this.nextS = 0;
 
     }
 
     idAStarRecursive() {
+        this.maxNodes = Math.max(this.maxNodes, this.idNode.length);
         this.actualNode = this.idNode.pop();
-        //this.done[this.actualNode.name] = true;
+        if (this.done[this.actualNode.name]) {
+            return;
+        }
         const {f, a} = this.actualNode;
 //console.log('start recu')
-        if (this.isInGoalPosition()) {
+        if (this.actualNode.h === 0) {
             this.end = true;
-            console.log('GoalPosition', this.actualNode, this.nbTry);
+            console.log('GoalPosition', this.actualNode, 'try:', this.nbTry, 'maxNodes:', this.maxNodes);
             return;
         }
 
@@ -134,6 +139,7 @@ module.exports = class Solver {
         });
         //console.log('end recu', Object.keys(this.node).length, process.memoryUsage())
         this.nbTry += 1;
+        this.done[this.actualNode.name] = true;
     }
 
     aStar() {
@@ -210,13 +216,66 @@ module.exports = class Solver {
         let distance = 0;
 
         actualNode.forEach((g, index) => {
+            if (g === 0) {
+                return;
+            }
             const l = Math.floor(index / this.length);
             const c = index % this.length;
-            distance += g === 0 ? 0 : (Math.abs(l - this.finalState[g].l) + Math.abs(c - this.finalState[g].c))
+            distance += (Math.abs(l - this.finalState[g].l) + Math.abs(c - this.finalState[g].c))
         });
-        const lc = this.linearConflict(actualNode);
+        //const lc = this.linearConflict(actualNode);
         //console.log(actualNode, distance, lc)
-        return distance + lc;
+        return distance// + lc;
+    };
+
+    manhattanLc(actualNode){
+        let distance = 0;
+        let conflict = 0;
+        let rows = [];
+        let lines = [];
+
+        actualNode.forEach((g, index) => {
+            if (g === 0) {
+                return;
+            }
+            const l = Math.floor(index / this.length);
+            if (l === this.finalState[g].l) {
+                if (!rows[l]) {
+                    rows[l] = [];
+                }
+                rows[l].push(this.finalState[g].c);
+            }
+            const c = index % this.length;
+            if (c === this.finalState[g].c) {
+                if (!lines[c]) {
+                    lines[c] = [];
+                }
+                lines[c].push(this.finalState[g].l);
+            }
+            distance += (Math.abs(l - this.finalState[g].l) + Math.abs(c - this.finalState[g].c))
+        });
+
+        [...rows, ...lines].forEach((testArray) => {
+            if (!testArray){
+                return;
+            }
+            let last = 0;
+            testArray.forEach((test, index) => {
+                let actualConflit = 0;
+                for (let j = index; j < testArray.length; j++) {
+                    if (test < testArray[j]) {
+                        actualConflit += 1;
+                    }
+                }
+                if (actualConflit && actualConflit !== last) {
+                    conflict += 1;
+                }
+                last = actualConflit;
+            })
+
+        });
+
+        return distance + (2 * conflict);
     };
 
     linearConflict(actualNode){

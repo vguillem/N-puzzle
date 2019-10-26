@@ -57,8 +57,8 @@ const getFinalState = (length) => {
     }
     finalState.unshift({l, c});
     finalStateName[l * length + c] = 0;
-    console.log(finalState);
-    console.log(finalStateName);
+    //console.log(finalState);
+    //console.log(finalStateName);
     return {finalState, name: finalStateName.join(',')};
 };
 

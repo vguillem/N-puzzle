@@ -58,6 +58,7 @@ let solver;
 let isSolvable = false;
 while(!isSolvable) {
     //const f = generate(4);
+    console.log(f)
     solver = new Solver(f);
     isSolvable = solver.checkIsSolvable();
 }

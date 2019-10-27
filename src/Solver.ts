@@ -56,29 +56,6 @@ const getChildren = (node: node): node[] => {
   });
 };
 
-const manhattanHeuristic = (puzzle: Puzzle) => {
-  let hr = 0;
-  for (let i = 0; i < puzzle.length; i++) {
-    for (let j = 0; j < puzzle.length; j++) {
-      const [x, y] = v[puzzle[i][j]];
-      hr += Math.abs(x - j) + Math.abs(y - i);
-    }
-  }
-  return hr;
-};
-
-const v = {
-  0: [1, 1],
-  1: [0, 0],
-  2: [1, 0],
-  3: [2, 0],
-  4: [2, 1],
-  5: [2, 2],
-  6: [1, 2],
-  7: [0, 2],
-  8: [0, 1]
-} as any;
-
 const BAD_PATTERNS = new Set(["up|down", "left|right"]);
 
 const filterMoves = (x: number, y: number, length: number, lastMove?: Move) => (

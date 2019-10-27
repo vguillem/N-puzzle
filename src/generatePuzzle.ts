@@ -1,4 +1,34 @@
-const isSolvable = (grid: Puzzle, length: number): boolean => {
+export const generatePuzzle = (size: number) => {
+  let puzzle;
+  do {
+    puzzle = createPuzzle(size);
+  } while (!isSolvable(puzzle, size));
+  return puzzle;
+};
+
+export const generateSolvedPuzzle = (size: number) => {
+  const puzzle = new Array(size)
+    .fill(null)
+    .map(_ => new Array(size).fill(null));
+
+  let [i, j] = [0, 0];
+  let [iInc, jInc] = [0, 1];
+  for (let x = 0; x < size * size; x++) {
+    puzzle[i][j] = x + 1 === size * size ? 0 : x + 1;
+    if ((i + 1 === size || puzzle[i + iInc][j] !== null) && iInc !== 0) {
+      iInc = 0;
+      jInc = j - 1 > 0 && puzzle[i][j - 1] === null ? -1 : 1;
+    } else if ((j + 1 === size || puzzle[i][j + jInc] !== null) && jInc !== 0) {
+      jInc = 0;
+      iInc = i - 1 > 0 && puzzle[i - 1][j] === null ? -1 : 1;
+    }
+    i += iInc;
+    j += jInc;
+  }
+  return puzzle;
+};
+
+export const isSolvable = (grid: Puzzle, length: number): boolean => {
   const gridValues = grid.flat();
 
   const inversion = getInversion(gridValues);
@@ -36,11 +66,3 @@ const generateValue = (currentValues: Set<number>, max: number): number => {
 };
 
 const getRandom = (max: number) => Math.floor(Math.random() * Math.floor(max));
-
-export const generatePuzzle = (size: number) => {
-  let puzzle;
-  do {
-    puzzle = createPuzzle(size);
-  } while (!isSolvable(puzzle, size));
-  return puzzle;
-};

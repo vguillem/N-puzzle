@@ -1,7 +1,14 @@
-import { generatePuzzle } from './generatePuzzle';
-import { solve } from './solver';
+import { generateSolvedPuzzle } from "./generatePuzzle";
+import { initializeHeuristics } from "./heuristics";
+import { puzzle3x3 } from "./data";
 
-const puzzle = generatePuzzle(3);
+const solved3x3 = generateSolvedPuzzle(3);
 
-solve(puzzle);
+const { manhattan } = initializeHeuristics(solved3x3, 3);
+
+const puzzleHeuristic = manhattan(puzzle3x3);
+const solvedHeuristic = manhattan(solved3x3);
+
+console.log(puzzleHeuristic);
+console.log(solvedHeuristic);
 

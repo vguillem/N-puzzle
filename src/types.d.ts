@@ -4,7 +4,6 @@ type Move = 'up' | 'down' | 'left' | 'right';
 
 interface node {
 		parent: node | null;
-		children: node[];
 		puzzle: Puzzle;
 		x: number;
 		y: number;

@@ -1,3 +1,4 @@
+import { solve } from './algo';
 import { generateSolvedPuzzle } from "./generatePuzzle";
 import { initializeHeuristics } from "./heuristics";
 import { puzzle3x3 } from "./data";
@@ -11,4 +12,6 @@ const solvedHeuristic = manhattan(solved3x3);
 
 console.log(puzzleHeuristic);
 console.log(solvedHeuristic);
+
+solve({ puzzle: puzzle3x3, heuristic: manhattan });
 

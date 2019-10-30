@@ -1,27 +1,93 @@
+import { wrongMove, switcher } from './utils';
+
 interface Props {
   puzzle: Puzzle;
   heuristic: Heuristic;
 }
 
 export const solve = ({ puzzle, heuristic }: Props) => {
+  const createNode = getCreateNode(heuristic);
+
   const [x, y] = findEmptyBlock(puzzle);
-  const firstNode = generateFirstNode(heuristic)(puzzle, x, y);
-  console.log(x, y, firstNode);
+  const firstNode = createNode(puzzle, x, y, [], -1);
+  let nodes: sNode[] = [firstNode];
+
+  while (nodes.length) {
+    // sort the array by heuristic
+    nodes = nodes.sort(
+      (a, b) => a.heuristic + a.level - (b.heuristic + b.level)
+    );
+
+
+    // get the node with smallest heuristic
+    const currentNode = nodes.pop() as sNode;
+
+    // we are done
+    if (currentNode.heuristic === 0) return currentNode;
+
+    const prevPath = currentNode.path;
+    const prevLevel = currentNode.level;
+    const lastMove: Move = prevPath[prevPath.length - 1];
+    const prevX = currentNode.x;
+    const prevY = currentNode.x;
+    const prevPuzzle = currentNode.puzzle;
+    (["up", "left", "right", "down"] as Move[]).forEach(move => {
+
+      const badMove = BAD_MOVE.has(`${lastMove}|${move}`);
+      const shouldNotMove = wrongMove[move](prevX, prevY, puzzle.length);
+
+      if (badMove || shouldNotMove) return;
+
+      const newPuzzle = prevPuzzle.map(l => l.slice());
+      const { newX, newY } = switcher[move](newPuzzle, prevX, prevY);
+      const newNode = createNode(
+        newPuzzle,
+        newX,
+        newY,
+        prevPath,
+        prevLevel,
+        move
+      );
+
+      if (nodes.some(d => d.id === newNode.id)) return;
+
+      nodes.push(newNode);
+    });
+    console.log("\n");
+  }
+
+  throw new Error("this puzzle cannot be solved");
 };
 
-const generateFirstNode = (heuristic: Heuristic) => (
+const BAD_MOVE = new Set([
+  "left|right",
+  "right|left",
+  "top|bottom",
+  "bottom|top"
+]);
+
+const getCreateNode = (heuristic: Heuristic) => (
   puzzle: Puzzle,
   x: number,
-  y: number
-): sNode => ({
-  heuristic: heuristic(puzzle),
-  parent: null,
-  path: [],
-  level: 0,
-  puzzle,
-  x,
-  y
-});
+  y: number,
+  prevPath: Move[],
+  prevLevel: number,
+  move?: Move
+): sNode => {
+  const h = heuristic(puzzle);
+  const newPath = prevPath.slice();
+  const newLevel = prevLevel + 1;
+  if (move) newPath.push(move);
+  return {
+    id: `${prevPath.pop()}${newLevel}${move}`,
+    heuristic: h,
+    path: newPath,
+    level: newLevel,
+    puzzle,
+    x,
+    y
+  };
+};
 
 const findEmptyBlock = (puzzle: Puzzle) => {
   for (let y = 0; y < puzzle.length; y++) {
@@ -32,4 +98,3 @@ const findEmptyBlock = (puzzle: Puzzle) => {
   }
   return [];
 };
-

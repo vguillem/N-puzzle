@@ -1,21 +1,22 @@
 type Puzzle = number[][];
 
-type Move = 'up' | 'down' | 'left' | 'right';
+type Move = "up" | "down" | "left" | "right";
 
 interface sNode {
-		parent: sNode | null;
-		puzzle: Puzzle;
-		path: Move[];
-		x: number;
-		y: number;
-		heuristic: number;
-		level: number;
+  id: string;
+  puzzle: Puzzle;
+  path: Move[];
+  x: number;
+  y: number;
+  heuristic: number;
+  level: number;
 }
 
+type Pool = { [id in string]: sNode };
+
 interface State {
-	node: Node;
-	currentLevel: number;
+  node: Node;
+  currentLevel: number;
 }
 
 type Heuristic = (puzzle: Puzzle) => number;
-

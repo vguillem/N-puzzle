@@ -1,4 +1,4 @@
-import { wrongMove, switcher } from './utils';
+import { wrongMove, switcher } from "./utils";
 
 interface Props {
   puzzle: Puzzle;
@@ -18,21 +18,22 @@ export const solve = ({ puzzle, heuristic }: Props) => {
       (a, b) => a.heuristic + a.level - (b.heuristic + b.level)
     );
 
-
     // get the node with smallest heuristic
     const currentNode = nodes.pop() as sNode;
 
     // we are done
     if (currentNode.heuristic === 0) return currentNode;
 
-    const prevPath = currentNode.path;
-    const prevLevel = currentNode.level;
+    const {
+      path: prevPath,
+      level: prevLevel,
+      x: prevX,
+      y: prevY,
+      puzzle: prevPuzzle
+    } = currentNode;
     const lastMove: Move = prevPath[prevPath.length - 1];
-    const prevX = currentNode.x;
-    const prevY = currentNode.x;
-    const prevPuzzle = currentNode.puzzle;
+    console.log(prevPuzzle);
     (["up", "left", "right", "down"] as Move[]).forEach(move => {
-
       const badMove = BAD_MOVE.has(`${lastMove}|${move}`);
       const shouldNotMove = wrongMove[move](prevX, prevY, puzzle.length);
 
@@ -53,7 +54,6 @@ export const solve = ({ puzzle, heuristic }: Props) => {
 
       nodes.push(newNode);
     });
-    console.log("\n");
   }
 
   throw new Error("this puzzle cannot be solved");
@@ -79,7 +79,7 @@ const getCreateNode = (heuristic: Heuristic) => (
   const newLevel = prevLevel + 1;
   if (move) newPath.push(move);
   return {
-    id: `${prevPath.pop()}${newLevel}${move}`,
+    id: puzzle.map(d => d.join('')).join(''),
     heuristic: h,
     path: newPath,
     level: newLevel,

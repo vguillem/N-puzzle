@@ -10,6 +10,7 @@ interface sNode {
   y: number;
   heuristic: number;
   level: number;
+	total: number;
 }
 
 type Pool = { [id in string]: sNode };

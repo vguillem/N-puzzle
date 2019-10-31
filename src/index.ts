@@ -2,18 +2,55 @@ import { solve } from "./algo";
 import { generateSolvedPuzzle, generatePuzzle } from "./generatePuzzle";
 import { initializeHeuristics } from "./heuristics";
 
-const solved3x3 = generateSolvedPuzzle(3);
+const allValues: number[] = [];
 
-const puzzle3x3 = generatePuzzle(3, solved3x3);
+(async () => {
+  while (true) {
+    const len = 4;
+    const solved = generateSolvedPuzzle(len);
+    const puzzle = generatePuzzle(len);
+    const { manhattan } = initializeHeuristics(solved, len);
+    try {
+      const time = Date.now();
 
-const { manhattan } = initializeHeuristics(solved3x3, 3);
+      // console.log("puzzle to solve: ", puzzle);
+      /* const solved = */ solve({ puzzle: puzzle, heuristic: manhattan });
+      // console.log(solved);
 
-try {
-	const time = Date.now();
-	console.log('puzzle to solve: ', puzzle3x3);
-  const solved = solve({ puzzle: puzzle3x3, heuristic: manhattan });
-	console.log(solved);
-	console.log(`time: ${Date.now() - time}ms`);
-} catch (e) {
-  console.error(e.message);
+      allValues.push(Date.now() - time);
+      console.log(`time: ${Date.now() - time}ms`);
+      logs();
+    } catch (e) {
+      console.error(e.message);
+    }
+    await new Promise(r => setTimeout(() => r(), 100));
+  }
+})();
+
+function logs() {
+  console.log("average: ", toMs(getAvg().toFixed(2)));
+  console.log("standard deviation: ", toMs(getStandardDeviation().toFixed(4)));
+  console.log(
+    "min: ",
+    toMs(allValues.reduce((a, b) => Math.min(a, b), Infinity).toString())
+  );
+  console.log(
+    "max: ",
+    toMs(allValues.reduce((a, b) => Math.max(a, b), -Infinity).toString())
+  );
+  console.log("\n");
+}
+
+function getAvg() {
+  return allValues.reduce((a, b) => a + b, 0) / allValues.length;
+}
+
+function getStandardDeviation() {
+  const average = getAvg();
+  const sumOfSquared = allValues.reduce((a, b) => a + (b - average) ** 2, 0);
+  return Math.sqrt(sumOfSquared / allValues.length);
+}
+
+function toMs(str: string) {
+  return `${str}ms`;
 }

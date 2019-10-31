@@ -10,12 +10,16 @@ export const solve = ({ puzzle, heuristic }: Props) => {
 
   const [x, y] = findEmptyBlock(puzzle);
   const firstNode = createNode(puzzle, x, y, [], -1);
+
+	console.log('start heuristic: ', firstNode.heuristic);
+
   let nodes: sNode[] = [firstNode];
+	const ids: Set<string> = new Set([firstNode.id]);
 
   while (nodes.length) {
     // sort the array by heuristic
     nodes = nodes.sort(
-      (a, b) => a.heuristic + a.level - (b.heuristic + b.level)
+      (a, b) => (b.heuristic + b.level) - (a.heuristic + a.level)
     );
 
     // get the node with smallest heuristic
@@ -32,11 +36,9 @@ export const solve = ({ puzzle, heuristic }: Props) => {
       puzzle: prevPuzzle
     } = currentNode;
     const lastMove: Move = prevPath[prevPath.length - 1];
-    console.log(prevPuzzle);
     (["up", "left", "right", "down"] as Move[]).forEach(move => {
       const badMove = BAD_MOVE.has(`${lastMove}|${move}`);
       const shouldNotMove = wrongMove[move](prevX, prevY, puzzle.length);
-
       if (badMove || shouldNotMove) return;
 
       const newPuzzle = prevPuzzle.map(l => l.slice());
@@ -50,9 +52,10 @@ export const solve = ({ puzzle, heuristic }: Props) => {
         move
       );
 
-      if (nodes.some(d => d.id === newNode.id)) return;
+      if (ids.has(newNode.id)) return;
 
       nodes.push(newNode);
+			ids.add(newNode.id);
     });
   }
 
@@ -62,8 +65,8 @@ export const solve = ({ puzzle, heuristic }: Props) => {
 const BAD_MOVE = new Set([
   "left|right",
   "right|left",
-  "top|bottom",
-  "bottom|top"
+  "up|down",
+  "down|up"
 ]);
 
 const getCreateNode = (heuristic: Heuristic) => (

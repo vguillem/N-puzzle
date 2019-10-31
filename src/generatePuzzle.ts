@@ -1,8 +1,8 @@
-export const generatePuzzle = (size: number) => {
+export const generatePuzzle = (size: number, solved: Puzzle) => {
   let puzzle;
   do {
     puzzle = createPuzzle(size);
-  } while (!isSolvable(puzzle, size));
+  } while (!isSolvable(puzzle, solved));
   return puzzle;
 };
 
@@ -28,23 +28,23 @@ export const generateSolvedPuzzle = (size: number) => {
   return puzzle;
 };
 
-export const isSolvable = (grid: Puzzle, length: number): boolean => {
-  const gridValues = grid.flat();
+export const isSolvable = (grid: Puzzle, solved: Puzzle): boolean => {
+	const gridValues = grid.flat().filter(d => d !== 0);
+	const solvedValues = solved.flat().filter(d => d !== 0);
 
-  const inversion = getInversion(gridValues);
+	const inversion = getInversion(gridValues, solvedValues);
 
-  if (length % 2) return Boolean(inversion % 2);
-
-  const startPos = Math.floor(gridValues.indexOf(0) / length) + 1;
-  return inversion % 2 === startPos % 2;
+	return gridValues.length % 2 ? inversion % 2 === 0 : inversion % 2 !== 0;
 };
 
-const getInversion = (gridValues: number[]) =>
-  gridValues.reduce((acc, num, index) => {
+const getInversion = (gridValues: number[], solvedValues: number[]) =>
+  gridValues.reduce((inversion, currentValue, index) => {
     for (let i = index + 1; i < gridValues.length - 1; i++) {
-      if (gridValues[i] < num) acc += 1;
+			// if the expected position of the next value is before the current value
+			const nextValue = gridValues[i];
+      if (solvedValues.indexOf(nextValue) < solvedValues.indexOf(currentValue)) inversion += 1;
     }
-    return acc;
+    return inversion;
   }, 0);
 
 const createPuzzle = (size: number): Puzzle => {

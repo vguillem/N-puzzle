@@ -82,3 +82,11 @@ export const findEmptyBlock = (puzzle: Puzzle) => {
   }
   return [];
 };
+
+export const getMinFromPool = (pool: { [x: number]: sNode[] }) => {
+  let minKey = Infinity;
+  for (const key in pool) {
+    if (+key < minKey) minKey = +key;
+  }
+  return minKey;
+};

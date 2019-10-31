@@ -6,7 +6,7 @@ const allValues: number[] = [];
 
 (async () => {
   while (true) {
-    const len = 4;
+    const len = 3;
     const solved = generateSolvedPuzzle(len);
     const puzzle = generatePuzzle(len);
     const { manhattan } = initializeHeuristics(solved, len);
@@ -17,8 +17,9 @@ const allValues: number[] = [];
       /* const solved = */ solve({ puzzle: puzzle, heuristic: manhattan });
       // console.log(solved);
 
-      allValues.push(Date.now() - time);
-      console.log(`time: ${Date.now() - time}ms`);
+      const solveTime = Date.now() - time;
+      allValues.push(solveTime);
+      console.log(`solved in ${solveTime}ms`);
       logs();
     } catch (e) {
       console.error(e.message);

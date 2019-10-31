@@ -1,6 +1,7 @@
 import {
   wrongMove,
   switcher,
+  getMinFromPool,
   badMoves,
   getCreateNode,
   findEmptyBlock
@@ -17,17 +18,16 @@ export const solve = ({ puzzle, heuristic }: Props) => {
   const [x, y] = findEmptyBlock(puzzle);
   const firstNode = createNode(puzzle, x, y, [], -1);
 
-  let nodes: sNode[] = [firstNode];
+  const pool = { [firstNode.total]: [firstNode] };
   const ids: { [id in string]: number } = { [firstNode.id]: 1 };
 
-  while (nodes.length) {
-    // sorting by heuristic does a greedy search, its usually more efficient
-    // but the path is not guaranteed to be the shortest
-    // do b.total - a.total to search for the smallest path
-    nodes = nodes.sort((a, b) => b.total - a.total);
-
+  while (Object.keys(pool).length) {
     // get the node with the smallest heuristic
-    const currentNode = nodes.pop() as sNode;
+    const minValue = getMinFromPool(pool);
+    const currentNode = pool[minValue].pop() as sNode;
+
+    // delete the array in the pool when there are no more elements in it
+    if (!pool[minValue].length) delete pool[minValue];
 
     // we are done in this case if the heuristic is 'admissible'
     if (currentNode.heuristic === 0) return currentNode;
@@ -60,7 +60,11 @@ export const solve = ({ puzzle, heuristic }: Props) => {
 
       if (ids[newNode.id]) return;
 
-      nodes.push(newNode);
+      // if there are no arrays at this level, create a new array with the new node
+      // else add the node to the array
+      if (!pool[newNode.total]) pool[newNode.total] = [newNode];
+      else pool[newNode.total].push(newNode);
+
       ids[newNode.id] = 1;
     });
   }

@@ -1,11 +1,34 @@
 import { solve } from "./algo";
 import { generateSolvedPuzzle, generatePuzzle } from "./generatePuzzle";
 import { initializeHeuristics } from "./heuristics";
-import { logs } from "./logger";
+import { logger } from "./logger";
 
-const allValuesManhattan: number[] = [];
-const allValuesLinear: number[] = [];
-const allValuesInversion: number[] = [];
+const state: State = {
+  manhattan: {
+    allSolvedTimes: [],
+    visitedNodes: 0,
+    createdNodes: 0,
+    solveTime: 0,
+    allVisitedNodes: [],
+    allCreatedNodes: []
+  },
+  linearConflict: {
+    allSolvedTimes: [],
+    visitedNodes: 0,
+    createdNodes: 0,
+    solveTime: 0,
+    allVisitedNodes: [],
+    allCreatedNodes: []
+  },
+  inversion: {
+    allSolvedTimes: [],
+    visitedNodes: 0,
+    createdNodes: 0,
+    solveTime: 0,
+    allVisitedNodes: [],
+    allCreatedNodes: []
+  }
+};
 
 export const run = async (len: number, timeout: number) => {
   while (true) {
@@ -16,36 +39,10 @@ export const run = async (len: number, timeout: number) => {
       len
     );
     try {
-      let [timeA, timeB, timeC] = [0, 0, 0];
-      let [solveTimeA, solveTimeB, solveTimeC] = [0, 0, 0];
-
-      timeA = Date.now();
-      solve({
-        puzzle: puzzle,
-        heuristic: inversion,
-        search: len === 4 ? "greedy" : "shortest"
-      });
-      solveTimeA = Date.now() - timeA;
-      allValuesInversion.push(solveTimeA);
-
-      timeB = Date.now();
-      solve({
-        puzzle: puzzle,
-        heuristic: manhattan,
-        search: len === 4 ? "greedy" : "shortest"
-      });
-      solveTimeB = Date.now() - timeB;
-      allValuesManhattan.push(solveTimeB);
-
-      timeC = Date.now();
-      solve({
-        puzzle: puzzle,
-        heuristic: linearConflict,
-        search: len === 4 ? "greedy" : "shortest"
-      });
-      solveTimeC = Date.now() - timeC;
-      allValuesLinear.push(solveTimeC);
-			print(solveTimeA, solveTimeB, solveTimeC);
+      compute(puzzle, manhattan, len, "manhattan");
+      compute(puzzle, inversion, len, "inversion");
+      compute(puzzle, linearConflict, len, "linearConflict");
+      logger(state);
     } catch (e) {
       console.error(e.message);
     }
@@ -53,21 +50,23 @@ export const run = async (len: number, timeout: number) => {
   }
 };
 
-function print(solveTimeA: number, solveTimeB: number, solveTimeC: number) {
-  console.clear();
-
-  console.log("\x1b[32;1m-------- linearConflict --------\x1b[0m");
-  console.log();
-	console.log(`\x1b[36;1msolved in            \x1b[32m${solveTimeC}\x1b[0;32mms\x1b[0m`);
-  logs(allValuesLinear);
-
-  console.log("\x1b[32;1m-------- inversion --------\x1b[0m");
-  console.log();
-	console.log(`\x1b[36;1msolved in            \x1b[32m${solveTimeA}\x1b[0;32mms\x1b[0m`);
-  logs(allValuesInversion);
-
-  console.log("\x1b[32;1m-------- manhattan --------\x1b[0m");
-  console.log();
-	console.log(`\x1b[36;1msolved in            \x1b[32m${solveTimeB}\x1b[0;32mms\x1b[0m`);
-  logs(allValuesManhattan);
-}
+const compute = (
+  puzzle: Puzzle,
+  heuristic: Heuristic,
+  len: number,
+  type: "inversion" | "linearConflict" | "manhattan"
+) => {
+  const time = Date.now();
+  const { visitedNodes, createdNodes } = solve({
+    puzzle: puzzle,
+    heuristic,
+    search: len === 4 ? "greedy" : "shortest"
+  });
+  const solveTime = Date.now() - time;
+  state[type].allSolvedTimes.push(solveTime);
+  state[type].solveTime = solveTime;
+  state[type].createdNodes = createdNodes;
+  state[type].allCreatedNodes.push(createdNodes);
+  state[type].visitedNodes = visitedNodes;
+  state[type].allVisitedNodes.push(visitedNodes);
+};

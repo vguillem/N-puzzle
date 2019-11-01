@@ -10,14 +10,24 @@ interface sNode {
   y: number;
   heuristic: number;
   level: number;
-	total: number;
+  total: number;
 }
 
 type Pool = { [id in string]: sNode };
 
+type Heuristic = (puzzle: Puzzle) => number;
+
 interface State {
-  node: Node;
-  currentLevel: number;
+  manhattan: HeuristicState;
+  linearConflict: HeuristicState;
+  inversion: HeuristicState;
 }
 
-type Heuristic = (puzzle: Puzzle) => number;
+interface HeuristicState {
+  visitedNodes: number;
+  allVisitedNodes: number[];
+  createdNodes: number;
+  allCreatedNodes: number[];
+  solveTime: number;
+  allSolvedTimes: number[];
+}

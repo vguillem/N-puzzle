@@ -30,7 +30,7 @@ export const generateSolvedPuzzle = (size: number) => {
 
 export const isSolvable = (grid: Puzzle, length: number) => {
   const gridValues = grid.flat();
-  const inversion = getInversion(gridValues);
+	const inversion = getInversion(gridValues.filter(d =>d !== 0));
   // solvable if grid length and inversion are both odd
   // even with 0 at end goal
   if (length % 2 === 1) return inversion % 2 === 1;
@@ -45,7 +45,7 @@ const getInversion = (gridValues: number[]) =>
   gridValues.reduce((acc, currentValue, index) => {
     for (let i = index + 1; i < gridValues.length; i++) {
       const nextValue = gridValues[i];
-      if (nextValue && nextValue < currentValue) acc += 1;
+      if (nextValue < currentValue) acc += 1;
     }
     return acc;
   }, 0);

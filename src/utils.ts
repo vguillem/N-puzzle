@@ -45,10 +45,10 @@ export const switcher: Switcher = {
 };
 
 export const badMoves = new Set([
-  "left|right",
-  "right|left",
-  "up|down",
-  "down|up"
+  'left|right',
+  'right|left',
+  'up|down',
+  'down|up'
 ]);
 
 export const getCreateNode = (heuristic: Heuristic) => (
@@ -64,7 +64,7 @@ export const getCreateNode = (heuristic: Heuristic) => (
   const newLevel = prevLevel + 1;
   if (move) newPath.push(move);
   return {
-    id: puzzle.flat().join("|"),
+    id: puzzle.flat().join('|'),
     heuristic: h,
     total: h + newLevel,
     path: newPath,

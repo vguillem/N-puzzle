@@ -1,21 +1,21 @@
-const blue = "\x1b[1;36m";
-const yellow = "\x1b[1;33m";
-const reset = "\x1b[0m";
-const white = "\x1b[0;3;33m";
-const green = "\x1b[32m";
-const greenReset = "\x1b[0;32m";
-const violet = "\x1b[1;35m";
+const blue = '\x1b[1;36m';
+const yellow = '\x1b[1;33m';
+const reset = '\x1b[0m';
+const white = '\x1b[0;3;33m';
+const green = '\x1b[32m';
+const greenReset = '\x1b[0;32m';
+const violet = '\x1b[1;35m';
 
 export function logger(state: State) {
   console.clear();
 
-  console.log("\x1b[32;1m-------- linearConflict --------\x1b[0m");
+  console.log('\x1b[32;1m-------- linearConflict --------\x1b[0m');
   logs(state.linearConflict);
 
-  console.log("\x1b[32;1m-------- inversion --------\x1b[0m");
+  console.log('\x1b[32;1m-------- inversion --------\x1b[0m');
   logs(state.inversion);
 
-  console.log("\x1b[32;1m-------- manhattan --------\x1b[0m");
+  console.log('\x1b[32;1m-------- manhattan --------\x1b[0m');
   logs(state.manhattan);
 }
 
@@ -40,9 +40,6 @@ function logs(state: HeuristicState) {
     formatMsValue(getMax(state.allSolvedTimes).toString())
   );
   console.log();
-  console.log(formatVisitedNodes(state.visitedNodes));
-  console.log(formatAvgVisitedNodes(getAvg(state.allVisitedNodes).toFixed()));
-  console.log(formatDeviationVisitedNodes(getStandardDeviation(state.allVisitedNodes).toFixed()));
   console.log();
 }
 
@@ -70,16 +67,4 @@ function formatMsValue(str: string | number) {
 
 function formatSolveTime(solveTime: number | string) {
   return `${blue}solved in            ${green}${solveTime}${greenReset}ms${reset}`;
-}
-
-function formatVisitedNodes(visitedNodes: number | string) {
-  return `${blue}visitedNodes:        ${violet}${visitedNodes}${reset}`;
-}
-
-function formatAvgVisitedNodes(visitedNodes: number | string) {
-  return `${blue}average:             ${violet}${visitedNodes}${reset}`;
-}
-
-function formatDeviationVisitedNodes(visitedNodes: number | string) {
-  return `${blue}standard deviation:  ${violet}${visitedNodes}${reset}`;
 }

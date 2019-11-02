@@ -5,15 +5,22 @@ import {
   badMoves,
   getCreateNode,
   findEmptyBlock
-} from "./utils";
+} from './utils';
 
 interface Props {
   puzzle: Puzzle;
   heuristic: Heuristic;
-  search: "greedy" | "shortest";
+  search: 'greedy' | 'uniform';
 }
 
-export const astar = ({ puzzle, heuristic, search }: Props) => {
+interface Return {
+  node: sNode;
+  createdNodes: number;
+  numNodes: number;
+  maxNumNodes: number;
+}
+
+export const astar = ({ puzzle, heuristic, search }: Props): Return => {
   const createNode = getCreateNode(heuristic);
 
   const getKey = getGetter[search];
@@ -24,20 +31,23 @@ export const astar = ({ puzzle, heuristic, search }: Props) => {
   const pool = { [getKey(firstNode)]: [firstNode] };
   const visited: { [id in string]: number } = { [firstNode.id]: 1 };
 
+  let numNodes = 1;
+  let maxNumNodes = 1;
+
   while (Object.keys(pool).length) {
-    // get the node with the smallest heuristic
     const minValue = getMinFromPool(pool);
     const currentNode = pool[minValue].pop() as sNode;
 
-    // delete the array in the pool when there are no more elements in it
+    maxNumNodes = Math.max(numNodes, maxNumNodes);
     if (!pool[minValue].length) delete pool[minValue];
+    numNodes -= 1;
 
-    // we are done in this case if the heuristic is 'admissible'
     if (currentNode.heuristic === 0) {
       return {
         node: currentNode,
-        visitedNodes: Object.keys(visited).length,
-        createdNodes
+        createdNodes,
+        numNodes,
+        maxNumNodes
       };
     }
 
@@ -51,7 +61,7 @@ export const astar = ({ puzzle, heuristic, search }: Props) => {
 
     const lastMove: Move = prevPath[prevPath.length - 1];
 
-    (["up", "left", "right", "down"] as Move[]).forEach(move => {
+    (['up', 'left', 'right', 'down'] as Move[]).forEach(move => {
       const badMove = badMoves.has(`${lastMove}|${move}`);
       const shouldNotMove = wrongMove[move](prevX, prevY, puzzle.length);
       if (badMove || shouldNotMove) return;
@@ -70,38 +80,49 @@ export const astar = ({ puzzle, heuristic, search }: Props) => {
 
       if (visited[newNode.id]) return;
 
-      // if there are no arrays at this level, create a new array with the new node
-      // else add the node to the array
       const key = getKey(newNode);
       if (!pool[key]) pool[key] = [newNode];
       else pool[key].push(newNode);
 
+      numNodes += 1;
       visited[newNode.id] = 1;
     });
   }
 
-  throw new Error("this puzzle cannot be solved");
+  throw new Error('this puzzle cannot be solved');
 };
 
 const getGetter = {
   greedy: (node: sNode) => node.heuristic,
-  shortest: (node: sNode) => node.total
+  uniform: (node: sNode) => node.total
 };
 
-export const idastar = ({ puzzle, heuristic }: Props) => {
+export const idastar = ({ puzzle, heuristic }: Props): Return => {
   const createNode = getCreateNode(heuristic);
 
   const [x, y] = findEmptyBlock(puzzle);
   let parentNode = createNode(puzzle, x, y, [], -1);
   let maxDepth = parentNode.heuristic + 1;
+  let createdNodes = 1;
+  let numNodes = 1;
+  let maxNumNodes = 1;
   while (true) {
     let nextMaxDepth: number = Infinity;
     const nodes: sNode[] = [parentNode];
     const visited: { [id in string]: number } = { [parentNode.id]: 1 };
     while (nodes.length) {
+      maxNumNodes = Math.max(numNodes, maxNumNodes);
       const currentNode = nodes.pop() as sNode;
+      numNodes -= 1;
 
-      if (currentNode.heuristic === 0) return currentNode;
+      if (currentNode.heuristic === 0) {
+        return {
+          node: currentNode,
+          createdNodes,
+          numNodes,
+          maxNumNodes
+        };
+      }
 
       const {
         path: prevPath,
@@ -113,7 +134,7 @@ export const idastar = ({ puzzle, heuristic }: Props) => {
 
       const lastMove: Move = prevPath[prevPath.length - 1];
 
-      (["up", "left", "right", "down"] as Move[]).forEach(move => {
+      (['up', 'left', 'right', 'down'] as Move[]).forEach(move => {
         const badMove = badMoves.has(`${lastMove}|${move}`);
         const shouldNotMove = wrongMove[move](prevX, prevY, puzzle.length);
         if (badMove || shouldNotMove) return;
@@ -128,10 +149,12 @@ export const idastar = ({ puzzle, heuristic }: Props) => {
           prevLevel,
           move
         );
+        createdNodes += 1;
         if (visited[newNode.id]) return;
         if (newNode.total < maxDepth) {
           nodes.push(newNode);
           visited[newNode.id] = 1;
+          numNodes += 1;
         } else nextMaxDepth = Math.min(nextMaxDepth, newNode.total);
       });
     }

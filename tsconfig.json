@@ -10,10 +10,11 @@
     "forceConsistentCasingInFileNames": true,
     "sourceMap": true,
     "lib": ["dom", "esnext"],
-    "typeRoots": ["./node_modules/*"],
+    "typeRoots": ["./node_modules/*", "./src"],
     "target": "esnext",
+	"types": ["node"],
     "baseUrl": "."
   },
-  "include": ["**/*"],
+  "include": ["./**/*"],
   "exclude": ["node_modules"]
 }

@@ -1,6 +1,6 @@
 type Puzzle = number[][];
 
-type Move = "up" | "down" | "left" | "right";
+type Move = 'up' | 'down' | 'left' | 'right';
 
 interface sNode {
   id: string;
@@ -24,13 +24,10 @@ interface State {
 }
 
 interface HeuristicState {
-  visitedNodes: number;
-  allVisitedNodes: number[];
   createdNodes: number;
   allCreatedNodes: number[];
   solveTime: number;
   allSolvedTimes: number[];
 }
 
-type PerNum = {[num: number]: number};
-
+type PerNum = { [num: number]: number };

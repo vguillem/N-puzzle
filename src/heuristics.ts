@@ -53,7 +53,7 @@ const linearConflict = (solved: PerNum, size: number) => (puzzle: Puzzle) => {
     nextSolvedX: number,
     nextSolvedY: number,
     tile: number,
-		manhattanValue: number = 0,
+    manhattanValue: number = 0,
     nextTile: number,
     minConflicts: number = 0;
 
@@ -68,7 +68,7 @@ const linearConflict = (solved: PerNum, size: number) => (puzzle: Puzzle) => {
       solvedY = Math.floor(solvedIndex / size);
       manhattanValue += Math.abs(solvedX - col) + Math.abs(solvedY - row);
       for (let nextCol = col + 1; nextCol < size; nextCol++) {
-      	if (puzzle[row][nextCol] === 0) continue;
+        if (puzzle[row][nextCol] === 0) continue;
         nextTile = puzzle[row][nextCol];
         nextSolvedIndex = solved[puzzle[row][nextCol]];
         nextSolvedX = nextSolvedIndex % size;
@@ -97,7 +97,7 @@ const linearConflict = (solved: PerNum, size: number) => (puzzle: Puzzle) => {
       solvedX = solvedIndex % size;
       solvedY = Math.floor(solvedIndex / size);
       for (let nextRow = row + 1; nextRow < size; nextRow++) {
-      	if (puzzle[nextRow][col] === 0) continue;
+        if (puzzle[nextRow][col] === 0) continue;
         nextTile = puzzle[nextRow][col];
         nextSolvedIndex = solved[nextTile];
         nextSolvedX = nextSolvedIndex % size;

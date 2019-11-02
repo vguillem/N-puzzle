@@ -14,12 +14,13 @@ const badPatern = [
 module.exports = class Solver {
 
     constructor(initialState) {
-        const {finalState, name} = getFinalState(initialState[0].length);
+        const {finalState, name, finalStates} = getFinalState(initialState[0].length);
         this.length = initialState[0].length;
         this.lengthC = initialState[0].length * initialState[0].length;
         this.node = {};
         this.idNode = [];
         this.finalState = finalState;
+        this.finalStates = finalStates;
         this.finalStateName = name;
         this.initialState = initialState;
         this.nbTry = 0;
@@ -28,7 +29,7 @@ module.exports = class Solver {
         this.actualNode = {};
         this.maxS = 0;
         this.nextS = 0;
-        this.done = {};
+        this.done = new Set();
     }
 
     checkIsSolvable() {
@@ -40,7 +41,7 @@ module.exports = class Solver {
         const node = getList(this.initialState);
         const nodeName = node.join(',');
         this.node[nodeName] = {f: 0, a: '', h: this.manhattan(node), array: node};
-        this.maxS = this.node[nodeName].h + 1;
+        this.maxS = this.node[nodeName].h;
         let start = Date.now();
 
         while (!this.end) {
@@ -77,18 +78,20 @@ module.exports = class Solver {
             this.idAStarRecursive();
         }
         //console.log(this.nextS)
-        this.done = {};
+        this.done.clear();
         this.maxS = this.nextS;
         this.nextS = 0;
+        console.log('newIte', this.maxS)
 
     }
 
     idAStarRecursive() {
         this.maxNodes = Math.max(this.maxNodes, this.idNode.length);
         this.actualNode = this.idNode.pop();
-        if (this.done[this.actualNode.name]) {
-            return;
-        }
+        //this.done.delete(this.actualNode.name);
+        // if (this.done[this.actualNode.name]) {
+        //     return;
+        // }
         const {f, a} = this.actualNode;
 //console.log('start recu')
         if (this.actualNode.h === 0) {
@@ -117,14 +120,16 @@ module.exports = class Solver {
             //     return acc;
             // }
 
-            const h = this.manhattan(newNode);
+            const h = this.manhattanLc(newNode);
             //const h = this.nbInGoodPosition(newNodeName);
             //console.log('add', newNodeName, h)
             const s = f + 1 + h;
             //console.log('s', s, this.maxS, this.nextS)
             if (s <= this.maxS ) {
-
-                acc.push({f: f + 1, h, a: `${a}${action}`, array: newNode, name: newNodeName});
+                if (!this.done.has(newNodeName)) {
+                    acc.push({f: f + 1, h, a: `${a}${action}`, array: newNode, name: newNodeName});
+                    this.done.add(newNodeName);
+                }
             } else if (!this.nextS || s < this.nextS) {
                 this.nextS = s;
             }
@@ -139,7 +144,7 @@ module.exports = class Solver {
         });
         //console.log('end recu', Object.keys(this.node).length, process.memoryUsage())
         this.nbTry += 1;
-        this.done[this.actualNode.name] = true;
+        // this.done[this.actualNode.name] = true;
     }
 
     aStar() {
@@ -259,75 +264,49 @@ module.exports = class Solver {
             if (!testArray){
                 return;
             }
-            let last = 0;
+            let cf = [];
             testArray.forEach((test, index) => {
-                let actualConflit = 0;
-                for (let j = index; j < testArray.length; j++) {
-                    if (test < testArray[j]) {
-                        actualConflit += 1;
+                if (!cf[test]) {
+                    cf[test] = new Set();
+                }
+
+                for(let i = index + 1; i < testArray.length; i++) {
+                    if (test > testArray[i]) {
+                        cf[test].add(testArray[i])
+                        if (!cf[testArray[i]]) {
+                            cf[testArray[i]] = new Set();
+                        }
+                        cf[testArray[i]].add(test);
                     }
                 }
-                if (actualConflit && actualConflit !== last) {
-                    conflict += 1;
-                }
-                last = actualConflit;
-            })
+            });
+
+            let biggerConflictIndex = 0;
+
+            const haveConflict = () => {
+
+                return cf.reduce((acc, test, index) => {
+                    if (test && test.size > acc) {
+                        acc = test.size;
+                        biggerConflictIndex = index;
+                    }
+                    return acc;
+                }, 0)
+            };
+
+            while(haveConflict()) {
+                conflict += 1;
+
+                cf[biggerConflictIndex].forEach(test => {
+                    cf[test].delete(biggerConflictIndex)
+                });
+                cf[biggerConflictIndex] = null;
+            }
 
         });
 
         return distance + (2 * conflict);
     };
-
-    linearConflict(actualNode){
-        let conflict = 0;
-        let last = 0;
-
-        for (let i = 0; i < this.length; i++) {
-            let raw = actualNode.slice(i * this.length, i * this.length + this.length);
-            let column = actualNode.filter((g, index) => index % this.length === i);
-            const potentialRConflit = raw.reduce((acc, p, actualIndex) =>{
-                if(p !== 0 && this.finalState[p].l === i) {
-                    acc.push(this.finalState[p].c);
-                }
-                return acc;
-            }, []);
-            //console.log(raw, potentialRConflit)
-            potentialRConflit.forEach((p, index) => {
-
-                let actualConflit = 0;
-                for (let j = index; j < potentialRConflit.length; j++) {
-                    if (p < potentialRConflit[j]) {
-                        actualConflit += 1;
-                    }
-                }
-                if (actualConflit && actualConflit !== last) {
-                    conflict += 1;
-                }
-                last = actualConflit;
-            });
-            last = 0;
-            const potentialCConflit = column.reduce((acc, p, actualIndex) =>{
-                if(p !== 0 && this.finalState[p].c === i) {
-                    acc.push(this.finalState[p].l)
-                }
-                return acc;
-            }, [])
-            potentialCConflit.forEach((p, index) => {
-                let actualConflit = 0;
-                for (let j = index; j < potentialRConflit.length; j++) {
-                    if (p < potentialRConflit[j]) {
-                        actualConflit += 1;
-                    }
-                }
-                if (actualConflit && actualConflit !== last) {
-                    conflict += 1;
-                }
-                last = actualConflit;
-            })
-        }
-
-        return conflict * 2;
-    }
 
     // nbInGoodPosition(actualState){
     //     let inGoodPosition = 0;

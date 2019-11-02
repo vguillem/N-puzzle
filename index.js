@@ -3,7 +3,7 @@ const {generate} = require('./generate');
 
 const args = process.argv;
 
-
+let f = null;
 // const f = [
 //     [7, 1, 2],
 //     [5, 0, 4],
@@ -45,19 +45,33 @@ const args = process.argv;
 //     [ 4, 8, 11, 14 ],
 //     [ 1, 7, 5, 0 ]
 // ];
-const f = [
+f = [
     [ 0, 14, 5, 1 ],
     [ 10, 8, 15, 12 ],
     [ 11, 9, 6, 13 ],
     [ 4, 7, 2, 3 ]
 ]
 
+// const f = [
+//     [ 4, 9, 14, 15 ],
+//     [ 5, 10, 13, 0 ],
+//     [ 12, 2, 6, 8 ],
+//     [ 11, 1, 7, 3 ]
+// ]
+
+// f = [
+//     [ 5, 4, 11, 3 ],
+//     [ 8, 12, 6, 13 ],
+//     [ 14, 15, 9, 1 ],
+//     [ 0, 7, 2, 10 ],
+// ];
+
 
 
 let solver;
 let isSolvable = false;
 while(!isSolvable) {
-    //const f = generate(4);
+    //f = generate(4);
     console.log(f)
     solver = new Solver(f);
     isSolvable = solver.checkIsSolvable();

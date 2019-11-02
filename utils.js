@@ -1,5 +1,6 @@
 const getFinalState = (length) => {
     const finalState = [];
+    const finalStates = [];
     let finalStateName = [];
     let direction = 'r';
     let c = 0;
@@ -11,6 +12,7 @@ const getFinalState = (length) => {
 
     for (let i = 1; i < length * length; i++) {
         finalState.push({c, l});
+        finalStates.push(l * length + c);
         finalStateName[l * length + c] = i;
         switch (direction) {
             case "r": {
@@ -56,10 +58,12 @@ const getFinalState = (length) => {
         }
     }
     finalState.unshift({l, c});
+    finalStates.unshift(l * length + c);
     finalStateName[l * length + c] = 0;
     //console.log(finalState);
     //console.log(finalStateName);
-    return {finalState, name: finalStateName.join(',')};
+    console.log(finalStates)
+    return {finalState, name: finalStateName.join(','), finalStates};
 };
 
 const getDistance = (goal, l, c) => {

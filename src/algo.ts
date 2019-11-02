@@ -13,14 +13,14 @@ interface Props {
   search: "greedy" | "shortest";
 }
 
-export const solve = ({ puzzle, heuristic, search }: Props) => {
+export const astar = ({ puzzle, heuristic, search }: Props) => {
   const createNode = getCreateNode(heuristic);
 
   const getKey = getGetter[search];
   const [x, y] = findEmptyBlock(puzzle);
   const firstNode = createNode(puzzle, x, y, [], -1);
 
-	let createdNodes = 1;
+  let createdNodes = 1;
   const pool = { [getKey(firstNode)]: [firstNode] };
   const visited: { [id in string]: number } = { [firstNode.id]: 1 };
 
@@ -66,7 +66,7 @@ export const solve = ({ puzzle, heuristic, search }: Props) => {
         prevLevel,
         move
       );
-			createdNodes++;
+      createdNodes++;
 
       if (visited[newNode.id]) return;
 
@@ -86,4 +86,55 @@ export const solve = ({ puzzle, heuristic, search }: Props) => {
 const getGetter = {
   greedy: (node: sNode) => node.heuristic,
   shortest: (node: sNode) => node.total
+};
+
+export const idastar = ({ puzzle, heuristic }: Props) => {
+  const createNode = getCreateNode(heuristic);
+
+  const [x, y] = findEmptyBlock(puzzle);
+  let parentNode = createNode(puzzle, x, y, [], -1);
+  let maxDepth = parentNode.heuristic;
+  while (true) {
+    let nextMaxDepth: number = Infinity;
+    const nodes: sNode[] = [parentNode];
+    const visited: { [id in string]: number } = { [parentNode.id]: 1 };
+    while (nodes.length) {
+      const currentNode = nodes.pop() as sNode;
+
+      if (currentNode.heuristic === 0) return currentNode;
+
+      const {
+        path: prevPath,
+        level: prevLevel,
+        x: prevX,
+        y: prevY,
+        puzzle: prevPuzzle
+      } = currentNode;
+
+      const lastMove: Move = prevPath[prevPath.length - 1];
+
+      (["up", "left", "right", "down"] as Move[]).forEach(move => {
+        const badMove = badMoves.has(`${lastMove}|${move}`);
+        const shouldNotMove = wrongMove[move](prevX, prevY, puzzle.length);
+        if (badMove || shouldNotMove) return;
+
+        const newPuzzle = prevPuzzle.map(l => l.slice());
+        const [newX, newY] = switcher[move](newPuzzle, prevX, prevY);
+        const newNode = createNode(
+          newPuzzle,
+          newX,
+          newY,
+          prevPath,
+          prevLevel,
+          move
+        );
+        if (visited[newNode.id]) return;
+        if (newNode.total <= maxDepth) {
+          nodes.push(newNode);
+          visited[newNode.id] = 1;
+        } else nextMaxDepth = Math.min(nextMaxDepth, newNode.total);
+      });
+    }
+    maxDepth = nextMaxDepth;
+  }
 };

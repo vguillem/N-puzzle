@@ -1,4 +1,4 @@
-import { solve } from "./algo";
+import { astar, idastar } from "./algo";
 import { generateSolvedPuzzle, generatePuzzle } from "./generatePuzzle";
 import { initializeHeuristics } from "./heuristics";
 import { logger } from "./logger";
@@ -40,13 +40,13 @@ export const run = async (len: number, timeout: number) => {
     );
     try {
       compute(puzzle, manhattan, len, "manhattan");
-      compute(puzzle, inversion, len, "inversion");
+      // compute(puzzle, inversion, len, "inversion");
       compute(puzzle, linearConflict, len, "linearConflict");
       logger(state);
     } catch (e) {
       console.error(e.message);
     }
-    await new Promise(r => setTimeout(() => r(), timeout));
+    await new Promise(r => setTimeout(r, timeout));
   }
 };
 
@@ -57,7 +57,7 @@ const compute = (
   type: "inversion" | "linearConflict" | "manhattan"
 ) => {
   const time = Date.now();
-  const { visitedNodes, createdNodes } = solve({
+/*const { visitedNodes, createdNodes } =*/ idastar({
     puzzle: puzzle,
     heuristic,
     search: len === 4 ? "greedy" : "shortest"
@@ -65,8 +65,8 @@ const compute = (
   const solveTime = Date.now() - time;
   state[type].allSolvedTimes.push(solveTime);
   state[type].solveTime = solveTime;
-  state[type].createdNodes = createdNodes;
-  state[type].allCreatedNodes.push(createdNodes);
-  state[type].visitedNodes = visitedNodes;
-  state[type].allVisitedNodes.push(visitedNodes);
+  // state[type].createdNodes = createdNodes;
+  // state[type].allCreatedNodes.push(createdNodes);
+  // state[type].visitedNodes = visitedNodes;
+  // state[type].allVisitedNodes.push(visitedNodes);
 };

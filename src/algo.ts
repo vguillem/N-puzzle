@@ -93,7 +93,7 @@ export const idastar = ({ puzzle, heuristic }: Props) => {
 
   const [x, y] = findEmptyBlock(puzzle);
   let parentNode = createNode(puzzle, x, y, [], -1);
-  let maxDepth = parentNode.heuristic;
+  let maxDepth = parentNode.heuristic + 1;
   while (true) {
     let nextMaxDepth: number = Infinity;
     const nodes: sNode[] = [parentNode];
@@ -129,12 +129,12 @@ export const idastar = ({ puzzle, heuristic }: Props) => {
           move
         );
         if (visited[newNode.id]) return;
-        if (newNode.total <= maxDepth) {
+        if (newNode.total < maxDepth) {
           nodes.push(newNode);
           visited[newNode.id] = 1;
         } else nextMaxDepth = Math.min(nextMaxDepth, newNode.total);
       });
     }
-    maxDepth = nextMaxDepth;
+    maxDepth = nextMaxDepth + 1;
   }
 };

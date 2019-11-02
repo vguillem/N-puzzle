@@ -31,3 +31,6 @@ interface HeuristicState {
   solveTime: number;
   allSolvedTimes: number[];
 }
+
+type PerNum = {[num: number]: number};
+

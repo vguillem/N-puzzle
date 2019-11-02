@@ -33,14 +33,20 @@ const state: State = {
 export const run = async (len: number, timeout: number) => {
   while (true) {
     const solved = generateSolvedPuzzle(len);
-    const puzzle = generatePuzzle(len);
+    const puzzle = generatePuzzle(
+      solved.flat().reduce((a, b, i) => {
+        a[b] = i;
+        return a;
+      }, {}),
+      len
+    );
     const { manhattan, linearConflict, inversion } = initializeHeuristics(
       solved,
       len
     );
     try {
       compute(puzzle, manhattan, len, "manhattan");
-      // compute(puzzle, inversion, len, "inversion");
+      compute(puzzle, inversion, len, "inversion");
       compute(puzzle, linearConflict, len, "linearConflict");
       logger(state);
     } catch (e) {
@@ -57,7 +63,7 @@ const compute = (
   type: "inversion" | "linearConflict" | "manhattan"
 ) => {
   const time = Date.now();
-/*const { visitedNodes, createdNodes } =*/ idastar({
+    const { visitedNodes, createdNodes } = astar({
     puzzle: puzzle,
     heuristic,
     search: len === 4 ? "greedy" : "shortest"
@@ -65,8 +71,8 @@ const compute = (
   const solveTime = Date.now() - time;
   state[type].allSolvedTimes.push(solveTime);
   state[type].solveTime = solveTime;
-  // state[type].createdNodes = createdNodes;
-  // state[type].allCreatedNodes.push(createdNodes);
-  // state[type].visitedNodes = visitedNodes;
-  // state[type].allVisitedNodes.push(visitedNodes);
+  state[type].createdNodes = createdNodes;
+  state[type].allCreatedNodes.push(createdNodes);
+  state[type].visitedNodes = visitedNodes;
+  state[type].allVisitedNodes.push(visitedNodes);
 };

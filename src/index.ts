@@ -10,7 +10,7 @@ const red = '\x1b[31;1m';
 
 const USAGE = `
 
-${white}usage: ./run.sh [OPTIONS] [FILE?]
+${white}usage: ./run [OPTIONS] [FILE?]
 
 OPTIONS:
 ${green}--size       ${reset}   specify the size of the puzzle

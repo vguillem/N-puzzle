@@ -1,7 +1,7 @@
 import * as algorithms from './algo';
 import { generateSolvedPuzzle, generatePuzzle } from './generatePuzzle';
 import { initializeHeuristics } from './heuristics';
-import { logBench } from './logger';
+import { logOnce, logBench } from './logger';
 import { config } from './config';
 
 const generateEmptyState = () => ({
@@ -27,8 +27,19 @@ export const runOnce = () => {
   const puzzle = generatePuzzle(solved, config.size);
   const heuristics = initializeHeuristics(solved, config.size);
   try {
-    config.heuristics.forEach(heuristic => {
-      computeOnce(puzzle, heuristics[heuristic], heuristic);
+    config.algorithms.forEach(algorithm => {
+      config.heuristics.forEach(heuristic => {
+        config.search.forEach(search => {
+          computeOnce(
+            puzzle,
+            heuristics[heuristic],
+            heuristic,
+            algorithm,
+            search
+          );
+          logOnce(algorithm, heuristic, search, state);
+        });
+      });
     });
   } catch (e) {
     console.error(e.message);
@@ -38,24 +49,22 @@ export const runOnce = () => {
 const computeOnce = (
   puzzle: Puzzle,
   heuristic: Heuristic,
-  type: heuristics
+  type: heuristics,
+  algorithm: algorithms,
+  search: searchStyle
 ) => {
   const time = Date.now();
-  config.algorithms.forEach(algorithm => {
-    const { node, numNodes, maxNumNodes, createdNodes } = algorithms[algorithm](
-      {
-        puzzle: puzzle,
-        heuristic,
-        search: config.search[0]
-      }
-    );
-    const solveTime = Date.now() - time;
-    state[type].solveTime = solveTime;
-    state[type].createdNodes = createdNodes;
-    state[type].numNodes = numNodes;
-    state[type].maxNumNodes = maxNumNodes;
-    state[type].path = node.path;
+  const { node, numNodes, maxNumNodes, createdNodes } = algorithms[algorithm]({
+    puzzle: puzzle,
+    heuristic,
+    search
   });
+  const solveTime = Date.now() - time;
+  state[type].solveTime = solveTime;
+  state[type].createdNodes = createdNodes;
+  state[type].numNodes = numNodes;
+  state[type].maxNumNodes = maxNumNodes;
+  state[type].path = node.path;
 };
 
 export const runBench = async () => {

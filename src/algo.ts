@@ -31,7 +31,8 @@ export const astar = ({ puzzle, heuristic, search }: Props): Return => {
   const pool = { [getKey(firstNode)]: [firstNode] };
   const visited: { [id in string]: number } = { [firstNode.id]: 1 };
 
-  let numNodes = 1;
+  let allCurrentNodes = 1;
+	let numNodes = 0;
   let maxNumNodes = 1;
 
   while (Object.keys(pool).length) {
@@ -39,8 +40,9 @@ export const astar = ({ puzzle, heuristic, search }: Props): Return => {
     const currentNode = pool[minValue].pop() as sNode;
 
     if (!pool[minValue].length) delete pool[minValue];
-    numNodes -= 1;
-    maxNumNodes = Math.max(numNodes, maxNumNodes);
+    allCurrentNodes -= 1;
+    maxNumNodes = Math.max(allCurrentNodes, maxNumNodes);
+		numNodes++;
 
     if (currentNode.heuristic === 0) {
       return {
@@ -84,7 +86,7 @@ export const astar = ({ puzzle, heuristic, search }: Props): Return => {
       if (!pool[key]) pool[key] = [newNode];
       else pool[key].push(newNode);
 
-      numNodes += 1;
+      allCurrentNodes += 1;
       visited[newNode.id] = 1;
     });
   }
@@ -104,7 +106,8 @@ export const idastar = ({ puzzle, heuristic }: Props): Return => {
   let parentNode = createNode(puzzle, x, y, [], -1);
   let maxDepth = parentNode.heuristic + 1;
   let createdNodes = 1;
-  let numNodes = 1;
+  let numNodes = 0;
+	let allCurrentNodes = 1;
   let maxNumNodes = 1;
   while (true) {
     let nextMaxDepth: number = Infinity;
@@ -112,8 +115,9 @@ export const idastar = ({ puzzle, heuristic }: Props): Return => {
     const visited: { [id in string]: number } = { [parentNode.id]: 1 };
     while (nodes.length) {
       const currentNode = nodes.pop() as sNode;
-      numNodes -= 1;
-      maxNumNodes = Math.max(numNodes, maxNumNodes);
+			allCurrentNodes -=1;
+      numNodes += 1;
+      maxNumNodes = Math.max(allCurrentNodes, maxNumNodes);
 
       if (currentNode.heuristic === 0) {
         return {
@@ -154,7 +158,7 @@ export const idastar = ({ puzzle, heuristic }: Props): Return => {
         if (newNode.total < maxDepth) {
           nodes.push(newNode);
           visited[newNode.id] = 1;
-          numNodes += 1;
+          allCurrentNodes += 1;
         } else nextMaxDepth = Math.min(nextMaxDepth, newNode.total);
       });
     }

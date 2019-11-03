@@ -15,7 +15,12 @@ interface sNode {
 
 type Pool = { [id in string]: sNode };
 
+type heuristics = 'inversion' | 'linearConflict' | 'manhattan';
 type Heuristic = (puzzle: Puzzle) => number;
+
+type algorithms = 'astar' | 'idastar';
+
+type searchStyle = 'greedy' | 'uniform';
 
 interface State {
   manhattan: HeuristicState;
@@ -28,6 +33,11 @@ interface HeuristicState {
   allCreatedNodes: number[];
   solveTime: number;
   allSolvedTimes: number[];
+  numNodes: number;
+  allNumNodes: number[];
+  maxNumNodes: number;
+  allMaxNumNodes: number[];
+  path: Move[];
 }
 
 type PerNum = { [num: number]: number };

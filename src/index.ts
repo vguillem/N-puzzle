@@ -1,5 +1,5 @@
-import { run, runOnce } from './runtime';
-import { config } from './config';
+import { runBench, runOnce } from './runtime';
+import { config, printConfig } from './config';
 
 const args = process.argv.slice(2);
 
@@ -10,13 +10,18 @@ const red = '\x1b[31;1m';
 
 const USAGE = `
 
-${white}usage: yarn dev [--size nb] [--bench,--interval nb] [-h|--help]${reset}
+${white}usage: ./run.sh [OPTIONS] [FILE?]
 
-${green}--bench${reset}        run the app in a loop and display benchmarks
-${green}--interval${reset}      specify the interval between tests if running in benchmark mode
-${green}--size${reset}      specify the interval between tests if running in benchmark mode
-${green}-h --help${reset}      show the help
+OPTIONS:
+${green}--size       ${reset}   specify the size of the puzzle
+${green}--algorithms ${reset}   list of coma (',') separated algorithms (astar,idastar)
+${green}--search     ${reset}   list of coma (',') separated search (greedy,uniform)
+${green}--heuristics ${reset}   list of coma (',') separated heuristics (manhattan,inversion,linearConflict)
 
+${green}--bench      ${reset}   run the app in a loop and display benchmarks: this will run with a default config
+${green}--interval   ${reset}   specify the interval between tests in benchmark mode
+
+${green}-h, --help   ${reset}   show this help
 `.trim();
 
 if (args.includes('-h') || args.includes('--help')) {
@@ -41,8 +46,66 @@ if (isNaN(config.size)) {
   process.exit(1);
 }
 
+if ((index = args.indexOf('--heuristics')) !== -1) {
+  const regexp = /linearConflict|manhattan|inversion/;
+  if (!args[index + 1]) {
+    console.error(
+      `${red}Error: ${reset}--heuristics requires a , separated list of heuristics (manhattan,inversion,linearConflict)`
+    );
+    process.exit(1);
+  }
+  const heuristics = args[index + 1].split(',') as heuristics[];
+  if (heuristics.some(h => !regexp.test(h))) {
+    console.error(
+      `${red}Error: ${reset}--heuristics requires a , separated list of heuristics (manhattan,inversion,linearConflict)`
+    );
+    process.exit(1);
+  }
+  config.heuristics = heuristics;
+}
+
+if ((index = args.indexOf('--algorithms')) !== -1) {
+  const regexp = /astar|idastar/;
+  if (!args[index + 1]) {
+    console.error(
+      `${red}Error: ${reset}--algorithms requires a coma separated list of algorithms (astar,idastar)`
+    );
+    process.exit(1);
+  }
+  const algorithms = args[index + 1].split(',') as algorithms[];
+  if (algorithms.some(h => !regexp.test(h))) {
+    console.error(
+      `${red}Error: ${reset}--algorithms requires a coma separated list of algorithms (astar,idastar)`
+    );
+    process.exit(1);
+  }
+  config.algorithms = algorithms;
+}
+
+if ((index = args.indexOf('--search')) !== -1) {
+  const regexp = /greedy|uniform/;
+  if (!args[index + 1]) {
+    console.error(
+      `${red}Error: ${reset}--search requires a coma separated list of searches (greedy,uniform)
+it will only work with the astar algorithm`
+    );
+    process.exit(1);
+  }
+  const searches = args[index + 1].split(',') as searchStyle[];
+  if (searches.some(h => !regexp.test(h))) {
+    console.error(
+      `${red}Error: ${reset}--search requires a coma separated list of searches (greedy,uniform)
+it will only work with the astar algorithm`
+    );
+    process.exit(1);
+  }
+  config.search = searches;
+}
+
+
 if (args.includes('--bench')) {
-  run();
+  runBench();
 } else {
+	printConfig();
   runOnce();
 }

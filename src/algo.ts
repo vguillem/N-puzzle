@@ -10,7 +10,7 @@ import {
 interface Props {
   puzzle: Puzzle;
   heuristic: Heuristic;
-  search: 'greedy' | 'uniform';
+	search: searchStyle;
 }
 
 interface Return {

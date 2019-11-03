@@ -6,7 +6,7 @@ const green = '\x1b[32m';
 const greenReset = '\x1b[0;32m';
 const violet = '\x1b[1;35m';
 
-export function logger(state: State) {
+export function logBench(state: State) {
   console.clear();
 
   console.log('\x1b[32;1m-------- linearConflict --------\x1b[0m');

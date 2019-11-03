@@ -38,9 +38,9 @@ export const astar = ({ puzzle, heuristic, search }: Props): Return => {
     const minValue = getMinFromPool(pool);
     const currentNode = pool[minValue].pop() as sNode;
 
-    maxNumNodes = Math.max(numNodes, maxNumNodes);
     if (!pool[minValue].length) delete pool[minValue];
     numNodes -= 1;
+    maxNumNodes = Math.max(numNodes, maxNumNodes);
 
     if (currentNode.heuristic === 0) {
       return {
@@ -111,9 +111,9 @@ export const idastar = ({ puzzle, heuristic }: Props): Return => {
     const nodes: sNode[] = [parentNode];
     const visited: { [id in string]: number } = { [parentNode.id]: 1 };
     while (nodes.length) {
-      maxNumNodes = Math.max(numNodes, maxNumNodes);
       const currentNode = nodes.pop() as sNode;
       numNodes -= 1;
+      maxNumNodes = Math.max(numNodes, maxNumNodes);
 
       if (currentNode.heuristic === 0) {
         return {

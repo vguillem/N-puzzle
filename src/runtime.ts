@@ -81,7 +81,7 @@ const computeBench = (
   type: heuristics
 ) => {
   const time = Date.now();
-  const { node, numNodes, maxNumNodes, createdNodes } = algorithms.astar({
+  const { numNodes, maxNumNodes, createdNodes } = algorithms.astar({
     puzzle: puzzle,
     heuristic,
     search: 'uniform'
@@ -95,5 +95,4 @@ const computeBench = (
   state[type].allNumNodes.push(numNodes);
   state[type].maxNumNodes = maxNumNodes;
   state[type].allMaxNumNodes.push(maxNumNodes);
-  state[type].path = node.path;
 };

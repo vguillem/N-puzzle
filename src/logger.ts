@@ -15,9 +15,9 @@ ${greenBold}-------- linearConflict --------${reset}
 
 ${logs(state.linearConflict)}
 
-${greenBold}-------- inversion --------${reset}
+${greenBold}-------- hamming --------${reset}
 
-${logs(state.inversion)}
+${logs(state.hamming)}
 
 ${greenBold}-------- manhattan --------${reset}
 
@@ -138,4 +138,14 @@ ${greenBold}total explored nodes  ${white}${data.numNodes}${reset}
 ${greenBold}total created nodes   ${white}${data.createdNodes}${reset}
 ${greenBold}path                  ${white}${formatPath(data.path)}${reset}
 `);
+}
+
+export function logPuzzle(puzzle: Puzzle, size: number) {
+  const str = puzzle.flat().reduce((a, b, i) => {
+if (!i) return b.toString();
+    const separator = i % size ? ' | ' : '\n---------\n';
+    return `${a}${separator}${b}`;
+  }, '');
+console.log(`
+${str}`);
 }

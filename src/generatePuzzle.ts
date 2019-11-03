@@ -10,7 +10,8 @@ export const generatePuzzle = (solved: Puzzle, size: number) => {
   do {
     puzzle = createPuzzle(size);
   } while (!isSolvable(flatSolved, puzzle, size));
-  return puzzle;
+	return [[3,2,6],[5,4,8],[1,0,7]]
+  // return puzzle;
 };
 
 export const generateSolvedPuzzle = (size: number) => {

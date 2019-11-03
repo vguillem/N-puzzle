@@ -2,7 +2,7 @@ export const initializeHeuristics = (solved: Puzzle, size: number) => {
   const indexesPerNum = solved.flat().reduce<PerNum>(arrayToSet, {});
   return {
     manhattan: manhattan(indexesPerNum, size),
-    inversion: inversion(indexesPerNum),
+    hamming: hamming(solved, size),
     linearConflict: linearConflict(indexesPerNum, size)
   };
 };
@@ -28,17 +28,16 @@ const manhattan = (solved: PerNum, size: number) => (puzzle: Puzzle) => {
   return heuristic;
 };
 
-const inversion = (solved: PerNum) => (puzzle: Puzzle) => {
-  const flattened = puzzle.flat();
-  return flattened.reduce((acc, currentValue, index) => {
-    const fromIndex = solved[currentValue];
-    for (let i = index + 1; i < flattened.length; i++) {
-      const toIndex = solved[flattened[i]];
-      if (toIndex < fromIndex) acc += 1;
+const hamming = (solved: Puzzle, size: number) => (puzzle: Puzzle) => {
+	let heuristic = 0;
+  for (let line = 0; line < size; line++) {
+    for (let col = 0; col < size; col++) {
+      if (puzzle[line][col] === 0) continue;
+			if (puzzle[line][col] !== solved[line][col]) heuristic++;
     }
-    return acc;
-  }, 0);
-};
+  }
+  return heuristic;
+}
 
 interface Conflict {
   who: number;

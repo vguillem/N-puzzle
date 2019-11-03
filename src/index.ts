@@ -16,7 +16,7 @@ OPTIONS:
 ${green}--size       ${reset}   specify the size of the puzzle
 ${green}--algorithms ${reset}   list of coma (',') separated algorithms (astar,idastar)
 ${green}--search     ${reset}   list of coma (',') separated search (greedy,uniform)
-${green}--heuristics ${reset}   list of coma (',') separated heuristics (manhattan,inversion,linearConflict)
+${green}--heuristics ${reset}   list of coma (',') separated heuristics (manhattan,hamming,linearConflict)
 
 ${green}--bench      ${reset}   run the app in a loop and display benchmarks: this will run with a default config
 ${green}--interval   ${reset}   specify the interval between tests in benchmark mode
@@ -47,17 +47,17 @@ if (isNaN(config.size)) {
 }
 
 if ((index = args.indexOf('--heuristics')) !== -1) {
-  const regexp = /linearConflict|manhattan|inversion/;
+  const regexp = /linearConflict|manhattan|hamming/;
   if (!args[index + 1]) {
     console.error(
-      `${red}Error: ${reset}--heuristics requires a , separated list of heuristics (manhattan,inversion,linearConflict)`
+      `${red}Error: ${reset}--heuristics requires a , separated list of heuristics (manhattan,hamming,linearConflict)`
     );
     process.exit(1);
   }
   const heuristics = args[index + 1].split(',') as heuristics[];
   if (heuristics.some(h => !regexp.test(h))) {
     console.error(
-      `${red}Error: ${reset}--heuristics requires a , separated list of heuristics (manhattan,inversion,linearConflict)`
+      `${red}Error: ${reset}--heuristics requires a , separated list of heuristics (manhattan,hamming,linearConflict)`
     );
     process.exit(1);
   }

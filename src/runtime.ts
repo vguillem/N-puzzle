@@ -1,7 +1,7 @@
 import * as algorithms from './algo';
 import { generateSolvedPuzzle, generatePuzzle } from './generatePuzzle';
 import { initializeHeuristics } from './heuristics';
-import { logOnce, logBench } from './logger';
+import { logOnce, logBench, logPuzzle } from './logger';
 import { config } from './config';
 
 const generateEmptyState = () => ({
@@ -19,13 +19,14 @@ const generateEmptyState = () => ({
 const state: State = {
   manhattan: generateEmptyState(),
   linearConflict: generateEmptyState(),
-  inversion: generateEmptyState()
+  hamming: generateEmptyState()
 };
 
 export const runOnce = () => {
   const solved = generateSolvedPuzzle(config.size);
   const puzzle = generatePuzzle(solved, config.size);
   const heuristics = initializeHeuristics(solved, config.size);
+	logPuzzle(puzzle, config.size);
   try {
     config.algorithms.forEach(algorithm => {
       config.heuristics.forEach(heuristic => {

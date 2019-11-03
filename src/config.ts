@@ -7,7 +7,7 @@ interface Config {
 }
 
 export const config: Config = {
-  heuristics: ['manhattan', 'inversion', 'linearConflict'],
+  heuristics: ['manhattan', 'hamming', 'linearConflict'],
   algorithms: ['astar'],
   search: ['uniform'],
   timeout: 100,

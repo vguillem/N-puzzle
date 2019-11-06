@@ -2,6 +2,7 @@ const {
     getFinalState,
     isSolvable,
     getList,
+    cornersTiles,
 } = require('./utils');
 
 const badPatern = [
@@ -29,7 +30,7 @@ module.exports = class Solver {
         this.actualNode = {};
         this.maxS = 0;
         this.nextS = 0;
-        this.done = new Set();
+        this.done = {};
     }
 
     checkIsSolvable() {
@@ -78,7 +79,7 @@ module.exports = class Solver {
             this.idAStarRecursive();
         }
         //console.log(this.nextS)
-        this.done.clear();
+        this.done = {};
         this.maxS = this.nextS;
         this.nextS = 0;
         console.log('newIte', this.maxS)
@@ -126,9 +127,9 @@ module.exports = class Solver {
             const s = f + 1 + h;
             //console.log('s', s, this.maxS, this.nextS)
             if (s <= this.maxS ) {
-                if (!this.done.has(newNodeName)) {
+                if (!this.done[newNodeName] || this.done[newNodeName] > s) {
                     acc.push({f: f + 1, h, a: `${a}${action}`, array: newNode, name: newNodeName});
-                    this.done.add(newNodeName);
+                    this.done[newNodeName] = s;
                 }
             } else if (!this.nextS || s < this.nextS) {
                 this.nextS = s;
@@ -182,6 +183,26 @@ module.exports = class Solver {
         this.node[this.actualNode.name].d = true;
         this.nbTry += 1;
     }
+
+
+
+    cornerTile(actualNode) {
+        let distance = 0;
+        const { addCornerConflict, getCornerTileConflict } = cornersTiles(this.length);
+
+        actualNode.forEach((g, index) => {
+            if (g === 0) {
+                return;
+            }
+            const l = Math.floor(index / this.length);
+            const c = index % this.length;
+            const man = (Math.abs(l - this.finalState[g].l) + Math.abs(c - this.finalState[g].c));
+            addCornerConflict(man, index);
+            distance += man
+        });
+
+        return distance + getCornerTileConflict();
+    };
 
     switchElement(action){
         let liste = [...this.actualNode.array]
@@ -238,6 +259,7 @@ module.exports = class Solver {
         let conflict = 0;
         let rows = [];
         let lines = [];
+        const { addCornerConflict, getCornerTileConflict } = cornersTiles(this.length);
 
         actualNode.forEach((g, index) => {
             if (g === 0) {
@@ -257,7 +279,9 @@ module.exports = class Solver {
                 }
                 lines[c].push(this.finalState[g].l);
             }
-            distance += (Math.abs(l - this.finalState[g].l) + Math.abs(c - this.finalState[g].c))
+            const man = (Math.abs(l - this.finalState[g].l) + Math.abs(c - this.finalState[g].c));
+            addCornerConflict(man, this.length);
+            distance += man
         });
 
         [...rows, ...lines].forEach((testArray) => {
@@ -305,7 +329,7 @@ module.exports = class Solver {
 
         });
 
-        return distance + (2 * conflict);
+        return distance + (2 * conflict) + getCornerTileConflict();
     };
 
     // nbInGoodPosition(actualState){

@@ -108,9 +108,81 @@ const isAtGoalPosition = (e, list, goalList) => {
     return list.indexOf(e) === goalList.indexOf(e);
 };
 
+const cornersTiles = (size) => {
+    const tiles = [0, 0, 0, 0];
+
+    const addCornerConflict = (manhattan, index) => {
+        if (manhattan) {
+            switch (index) {
+                case 0: {
+                    tiles[0] += 1;
+                    break;
+                }
+                case size - 1: {
+                    tiles[1] += 1;
+                    break;
+                }
+                case size * size - size: {
+                    tiles[2] += 1;
+                    break;
+                }
+                case size * size - 1: {
+                    tiles[3] += 1;
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
+        } else {
+            switch (index) {
+                case 1:
+                case size: {
+                    tiles[0] += 1;
+                    break;
+                }
+                case size - 2:
+                case 2 * size - 1: {
+                    tiles[1] += 1;
+                    break;
+                }
+                case (size * size) - ( 2 * size):
+                case (size * size) - size: {
+                    tiles[2] += 1;
+                    break;
+                }
+                case size * size - 2:
+                case (size * size) - (size + 1): {
+                    tiles[3] += 1;
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
+        }
+    }
+
+    const getCornerTileConflict = () => {
+        return tiles.reduce((acc, t) => {
+            if (t === 3) {
+                acc += 4;
+            }
+            return acc;
+        }, 0);
+
+    };
+
+    return {
+        addCornerConflict,
+        getCornerTileConflict
+    }
+};
+
 module.exports = {
     getFinalState: getFinalState,
     isSolvable: isSolvable,
     getList: getList,
     isAtGoalPosition: isAtGoalPosition,
+    cornersTiles: cornersTiles,
 };

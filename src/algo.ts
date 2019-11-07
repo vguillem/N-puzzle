@@ -29,8 +29,9 @@ export const astar = ({ puzzle, heuristic, search }: Props): Return => {
   const firstNode = createNode(puzzle, x, y, [], -1);
 
   let createdNodes = 1;
-  const pool = { [getKey(firstNode)]: [firstNode] };
-  const visited: { [id in string]: number } = { [firstNode.id]: firstNode.heuristic };
+  const value = getKey(firstNode);
+  const pool = { [value]: [firstNode] };
+  const visited: { [id in string]: number } = { [firstNode.id]: value };
 
   let allCurrentNodes = 1;
 	let numNodes = 0;
@@ -81,14 +82,14 @@ export const astar = ({ puzzle, heuristic, search }: Props): Return => {
       );
       createdNodes++;
 
-			if (visited[newNode.id] && visited[newNode.id] < newNode.heuristic) return;
+			if (visited[newNode.id] && visited[newNode.id] < getKey(newNode)) return;
 
       const key = getKey(newNode);
       if (!pool[key]) pool[key] = [newNode];
       else pool[key].push(newNode);
 
       allCurrentNodes += 1;
-      visited[newNode.id] = newNode.heuristic;
+      visited[newNode.id] = getKey(newNode);
     });
   }
 
@@ -113,7 +114,7 @@ export const idastar = ({ puzzle, heuristic }: Props): Return => {
   while (true) {
     let nextMaxDepth: number = Infinity;
     const nodes: sNode[] = [parentNode];
-    const visited: { [id in string]: number } = { [parentNode.id]: parentNode.heuristic };
+    const visited: { [id in string]: number } = { [parentNode.id]: parentNode.total };
     while (nodes.length) {
       const currentNode = nodes.pop() as sNode;
 			allCurrentNodes -=1;
@@ -155,10 +156,10 @@ export const idastar = ({ puzzle, heuristic }: Props): Return => {
           move
         );
         createdNodes += 1;
-				if (visited[newNode.id] && visited[newNode.id] < newNode.heuristic) return;
+				if (visited[newNode.id] && visited[newNode.id] < newNode.total) return;
         if (newNode.total < maxDepth) {
           nodes.push(newNode);
-          visited[newNode.id] = newNode.heuristic;
+          visited[newNode.id] = newNode.total;
           allCurrentNodes += 1;
         } else nextMaxDepth = Math.min(nextMaxDepth, newNode.total);
       });

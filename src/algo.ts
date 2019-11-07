@@ -97,8 +97,9 @@ export const astar = ({ puzzle, heuristic, search }: Props): Return => {
 };
 
 const getGetter = {
+  normal: (node: sNode) => node.total,
   greedy: (node: sNode) => node.heuristic,
-  uniform: (node: sNode) => node.total
+  uniform: (node: sNode) => node.level
 };
 
 export const idastar = ({ puzzle, heuristic }: Props): Return => {

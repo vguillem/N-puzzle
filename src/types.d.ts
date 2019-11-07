@@ -20,7 +20,7 @@ type Heuristic = (puzzle: Puzzle) => number;
 
 type algorithms = 'astar' | 'idastar';
 
-type searchStyle = 'greedy' | 'uniform';
+type searchStyle = 'normal' | 'greedy' | 'uniform';
 
 interface State {
   manhattan: HeuristicState;

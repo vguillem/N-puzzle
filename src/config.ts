@@ -9,7 +9,7 @@ interface Config {
 export const config: Config = {
   heuristics: ['manhattan', 'hamming', 'linearConflict'],
   algorithms: ['astar'],
-  search: ['uniform'],
+  search: ['normal'],
   timeout: 100,
   size: 3
 };

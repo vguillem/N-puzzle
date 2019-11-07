@@ -16,7 +16,7 @@ ${white}usage: ./run [OPTIONS] [FILE?]
 OPTIONS:
 ${green}--size       ${reset}   specify the size of the puzzle
 ${green}--algorithms ${reset}   list of coma (',') separated algorithms (astar,idastar)
-${green}--search     ${reset}   list of coma (',') separated search (greedy,uniform)
+${green}--search     ${reset}   list of coma (',') separated search (normal,greedy,uniform)
 ${green}--heuristics ${reset}   list of coma (',') separated heuristics (manhattan,hamming,linearConflict)
 
 ${green}--bench      ${reset}   run the app in a loop and display benchmarks: this will run with a default config
@@ -84,10 +84,10 @@ if ((index = args.indexOf('--algorithms')) !== -1) {
 }
 
 if ((index = args.indexOf('--search')) !== -1) {
-  const regexp = /greedy|uniform/;
+  const regexp = /greedy|uniform|normal/;
   if (!args[index + 1]) {
     console.error(
-      `${red}Error: ${reset}--search requires a coma separated list of searches (greedy,uniform)
+      `${red}Error: ${reset}--search requires a coma separated list of searches (normal,greedy,uniform)
 it will only work with the astar algorithm`
     );
     process.exit(1);
@@ -95,7 +95,7 @@ it will only work with the astar algorithm`
   const searches = args[index + 1].split(',') as searchStyle[];
   if (searches.some(h => !regexp.test(h))) {
     console.error(
-      `${red}Error: ${reset}--search requires a coma separated list of searches (greedy,uniform)
+      `${red}Error: ${reset}--search requires a coma separated list of searches (normal,greedy,uniform)
 it will only work with the astar algorithm`
     );
     process.exit(1);

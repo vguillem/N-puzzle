@@ -11,7 +11,7 @@ import { config } from './config';
 interface Props {
   puzzle: Puzzle;
   heuristic: Heuristic;
-	search: searchStyle;
+  search: searchStyle;
 }
 
 interface Return {
@@ -34,7 +34,7 @@ export const astar = ({ puzzle, heuristic, search }: Props): Return => {
   const visited: { [id in string]: number } = { [firstNode.id]: value };
 
   let allCurrentNodes = 1;
-	let numNodes = 0;
+  let numNodes = 0;
   let maxNumNodes = 1;
 
   while (Object.keys(pool).length) {
@@ -44,7 +44,7 @@ export const astar = ({ puzzle, heuristic, search }: Props): Return => {
     if (!pool[minValue].length) delete pool[minValue];
     allCurrentNodes -= 1;
     maxNumNodes = Math.max(allCurrentNodes, maxNumNodes);
-		numNodes++;
+    numNodes++;
 
     if (currentNode.heuristic === 0) {
       return {
@@ -82,14 +82,14 @@ export const astar = ({ puzzle, heuristic, search }: Props): Return => {
       );
       createdNodes++;
 
-			if (visited[newNode.id] && visited[newNode.id] < getKey(newNode)) return;
+      const value = getKey(newNode);
+      if (visited[newNode.id] && visited[newNode.id] < value) return;
 
-      const key = getKey(newNode);
-      if (!pool[key]) pool[key] = [newNode];
-      else pool[key].push(newNode);
+      if (!pool[value]) pool[value] = [newNode];
+      else pool[value].push(newNode);
 
       allCurrentNodes += 1;
-      visited[newNode.id] = getKey(newNode);
+      visited[newNode.id] = value;
     });
   }
 
@@ -110,15 +110,17 @@ export const idastar = ({ puzzle, heuristic }: Props): Return => {
   let maxDepth = parentNode.heuristic + 1;
   let createdNodes = 1;
   let numNodes = 0;
-	let allCurrentNodes = 1;
+  let allCurrentNodes = 1;
   let maxNumNodes = 1;
   while (true) {
     let nextMaxDepth: number = Infinity;
     const nodes: sNode[] = [parentNode];
-    const visited: { [id in string]: number } = { [parentNode.id]: parentNode.total };
+    const visited: { [id in string]: number } = {
+      [parentNode.id]: parentNode.total
+    };
     while (nodes.length) {
       const currentNode = nodes.pop() as sNode;
-			allCurrentNodes -=1;
+      allCurrentNodes -= 1;
       numNodes += 1;
       maxNumNodes = Math.max(allCurrentNodes, maxNumNodes);
 
@@ -157,7 +159,7 @@ export const idastar = ({ puzzle, heuristic }: Props): Return => {
           move
         );
         createdNodes += 1;
-				if (visited[newNode.id] && visited[newNode.id] < newNode.total) return;
+        if (visited[newNode.id] && visited[newNode.id] < newNode.total) return;
         if (newNode.total < maxDepth) {
           nodes.push(newNode);
           visited[newNode.id] = newNode.total;

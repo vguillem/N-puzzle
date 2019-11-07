@@ -22,9 +22,8 @@ const state: State = {
   hamming: generateEmptyState()
 };
 
-export const runOnce = () => {
+export const runOnce = (puzzle: Puzzle) => {
   const solved = generateSolvedPuzzle(config.size);
-  const puzzle = generatePuzzle(solved, config.size);
   const heuristics = initializeHeuristics(solved, config.size);
 	logPuzzle(puzzle, config.size);
   try {

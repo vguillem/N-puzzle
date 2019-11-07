@@ -1,5 +1,6 @@
 import { runBench, runOnce } from './runtime';
 import { config, printConfig } from './config';
+import { getPuzzle } from './handleInput';
 
 const args = process.argv.slice(2);
 
@@ -102,10 +103,19 @@ it will only work with the astar algorithm`
   config.search = searches;
 }
 
-
 if (args.includes('--bench')) {
   runBench();
 } else {
-	printConfig();
-  runOnce();
+  printConfig();
+  let puzzle;
+  try {
+    puzzle = getPuzzle(args);
+  } catch (e) {
+    if (e.message === 'unsolvable')
+      console.error(`${red}Error: ${reset}the puzzle is not solvable`);
+    else if (e.message === 'file')
+      console.error(`${red}Error: ${reset}file is not valid`);
+    process.exit(1);
+  }
+  runOnce(puzzle as Puzzle);
 }

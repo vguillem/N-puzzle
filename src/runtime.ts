@@ -25,6 +25,7 @@ const state: State = {
 export const runOnce = (puzzle: Puzzle) => {
   const solved = generateSolvedPuzzle(config.size);
   const heuristics = initializeHeuristics(solved, config.size);
+  console.log();
   logPuzzle(puzzle, config.size);
   try {
     config.algorithms.forEach(algorithm => {
@@ -75,13 +76,12 @@ export const runBench = async () => {
     config.heuristics.forEach(heuristic => {
       try {
         computeBench(puzzle, heuristics[heuristic], heuristic);
-				// TODO log bench should only log heuristics that have been mentionned in the --heuristics flag
         logBench(state);
       } catch (e) {
         console.error(e.message);
       }
     });
-    await new Promise(r => setTimeout(r, config.timeout));
+    await new Promise(r => setTimeout(r, 200));
   }
 };
 

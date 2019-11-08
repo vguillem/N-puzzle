@@ -1,3 +1,5 @@
+import { config } from './config';
+
 const blue = '\x1b[1;36m';
 const yellow = '\x1b[1;33m';
 const yellowSmooth = '\x1b[0;3;33m';
@@ -5,24 +7,18 @@ const reset = '\x1b[0m';
 const white = '\x1b[1;37m';
 const greenBold = '\x1b[32;1m';
 const violet = '\x1b[35;1m';
-const red = '\x1b[32;1m';
+const red = '\x1b[31;1m';
 
 export function logBench(state: State) {
   console.clear();
 
-  console.log(`
-${greenBold}-------- linearConflict --------${reset}
+  config.heuristics.forEach(heuristic =>
+    console.log(`
+${greenBold}-------- ${heuristic} --------${reset}
 
-${logs(state.linearConflict)}
-
-${greenBold}-------- hamming --------${reset}
-
-${logs(state.hamming)}
-
-${greenBold}-------- manhattan --------${reset}
-
-${logs(state.manhattan)}
-`);
+${logs(state[heuristic])}
+`)
+  );
 }
 
 function logs(state: HeuristicState) {
@@ -141,11 +137,21 @@ ${greenBold}path                  ${white}${formatPath(data.path)}${reset}
 }
 
 export function logPuzzle(puzzle: Puzzle, size: number) {
-  const str = puzzle.flat().reduce((a, b, i) => {
-if (!i) return b.toString();
-    const separator = i % size ? ' | ' : '\n---------\n';
-    return `${a}${separator}${b}`;
-  }, '');
-console.log(`
-${str}`);
+  const max = String(Math.max(...puzzle.flat())).length;
+  const stringLength = max * size + (size - 1) * 3 + 4;
+  let str = `${violet}${'-'.repeat(stringLength)}\n| ${reset}`;
+  let startSize = str.length;
+  for (const row of puzzle) {
+    if (str.length > startSize)
+      str = `${str}\n${violet}${'-'.repeat(stringLength)}\n${violet}| ${reset}`;
+    for (const col of row) {
+      const colStr =
+        col === 0
+          ? `${red}${col.toString().padEnd(max, ' ')}`
+          : `${blue}${col.toString().padEnd(max, ' ')}`;
+      str = `${str}${colStr}${reset} ${violet}| ${reset}`;
+    }
+  }
+  str = `${str}\n${violet}${'-'.repeat(stringLength)}${reset}\n`;
+  console.log(str);
 }

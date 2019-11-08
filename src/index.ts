@@ -19,8 +19,8 @@ ${green}--algorithms ${reset}   list of coma (',') separated algorithms (astar,i
 ${green}--search     ${reset}   list of coma (',') separated search (normal,greedy,uniform)
 ${green}--heuristics ${reset}   list of coma (',') separated heuristics (manhattan,hamming,linearConflict)
 
-${green}--bench      ${reset}   run the app in a loop and display benchmarks: this will run with a default config
-${green}--interval   ${reset}   specify the interval between tests in benchmark mode
+${green}--bench      ${reset}   run the app in a loop and display benchmark:
+${reset}             ${reset}   this will run with the astar algorithm on a 3x3 puzzle
 
 ${green}-h, --help   ${reset}   show this help
 `.trim();
@@ -31,14 +31,6 @@ if (args.includes('-h') || args.includes('--help')) {
 }
 
 let index;
-if ((index = args.indexOf('--interval')) !== -1) {
-  config.timeout = Number(args[index + 1]);
-}
-if (isNaN(config.timeout)) {
-  console.error(`${red}Error: ${reset}--interval requires a number`);
-  process.exit(1);
-}
-
 if ((index = args.indexOf('--size')) !== -1) {
   config.size = Number(args[index + 1]);
 }

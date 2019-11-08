@@ -53,8 +53,8 @@ const linearConflict = (solved: PerNum, size: number) => (puzzle: Puzzle) => {
       const sRow = Math.floor(solved[tile] / 3);
       manhattanValue += Math.abs(sCol - col) + Math.abs(sRow - row);
 
-      let conflicts: Array<[number, number]> = [];
       if (sRow === row) {
+        let conflicts: Array<[number, number]> = [];
         for (let colNext = 0; colNext < size; colNext++) {
           const nextTile = puzzle[row][colNext];
           if (nextTile === tile || !nextTile) continue;
@@ -68,11 +68,11 @@ const linearConflict = (solved: PerNum, size: number) => (puzzle: Puzzle) => {
             conflicts.push([tile, nextTile]);
           }
         }
-      }
-      while (conflicts.length) {
-        const max = getMax(conflicts);
-        conflicts = conflicts.filter(d => d[0] !== max && d[1] !== max);
-        allConflicts++;
+        while (conflicts.length) {
+          const max = getMax(conflicts);
+          conflicts = conflicts.filter(d => d[0] !== max && d[1] !== max);
+          allConflicts++;
+        }
       }
     }
   }

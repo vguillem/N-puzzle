@@ -76,7 +76,7 @@ const linearConflict = (solved: PerNum, size: number) => (puzzle: Puzzle) => {
     if (!testArray) {
       return;
     }
-    let cf: Array<Set<number> | null> = [];
+    let cf: Array<Set<number>> = [];
     testArray.forEach((test, index) => {
       if (!cf[test]) {
         cf[test] = new Set();
@@ -112,7 +112,7 @@ const linearConflict = (solved: PerNum, size: number) => (puzzle: Puzzle) => {
       cf[biggerConflictIndex].forEach(test => {
         cf[test].delete(biggerConflictIndex)
       });
-      cf[biggerConflictIndex] = null;
+      cf[biggerConflictIndex] = null as any;
     }
 
   });

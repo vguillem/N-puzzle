@@ -43,6 +43,7 @@ const hamming = (solved: Puzzle, size: number) => (puzzle: Puzzle) => {
 const linearConflict = (solved: PerNum, size: number) => (puzzle: Puzzle) => {
   let manhattanValue = 0;
   let allConflicts = 0;
+  let conflicts: Array<[number, number]> = [];
 
   for (let row = 0; row < size; row++) {
     for (let col = 0; col < size; col++) {
@@ -54,7 +55,6 @@ const linearConflict = (solved: PerNum, size: number) => (puzzle: Puzzle) => {
       manhattanValue += Math.abs(sCol - col) + Math.abs(sRow - row);
 
       if (row === sRow) {
-        let conflicts: Array<[number, number]> = [];
         for (let colNext = 0; colNext < size; colNext++) {
           const nextTile = puzzle[row][colNext];
           if (nextTile === tile || !nextTile) continue;
@@ -72,19 +72,8 @@ const linearConflict = (solved: PerNum, size: number) => (puzzle: Puzzle) => {
           allConflicts++;
         }
       }
-    }
-  }
-
-  for (let col = 0; col < size; col++) {
-    for (let row = 0; row < size; row++) {
-      const tile = puzzle[row][col];
-      if (!tile) continue;
-
-      const sCol = solved[tile] % 3;
-      const sRow = Math.floor(solved[tile] / 3);
 
       if (col === sCol) {
-        let conflicts: Array<[number, number]> = [];
         for (let rowNext = 0; rowNext < size; rowNext++) {
           const nextTile = puzzle[rowNext][col];
           if (nextTile === tile || !nextTile) continue;
@@ -99,11 +88,12 @@ const linearConflict = (solved: PerNum, size: number) => (puzzle: Puzzle) => {
         while (conflicts.length) {
           const max = getMax(conflicts);
           conflicts = conflicts.filter(d => d[0] !== max && d[1] !== max);
-          allConflicts++;
+					allConflicts++;
         }
       }
     }
   }
+
   return manhattanValue + 2 * allConflicts;
 };
 

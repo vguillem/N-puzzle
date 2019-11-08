@@ -15,11 +15,12 @@ const arrayToSet = (acc: PerNum, cur: number, i: number) => {
 const manhattan = (solved: PerNum, size: number) => (puzzle: Puzzle) => {
   let heuristic = 0,
     solvedCol: number,
-    solvedRow: number;
+    solvedRow: number,
+    index: number;
   for (let row = 0; row < size; row++) {
     for (let col = 0; col < size; col++) {
       if (puzzle[row][col] === 0) continue;
-      const index = solved[puzzle[row][col]];
+      index = solved[puzzle[row][col]];
       solvedCol = index % size;
       solvedRow = Math.floor(index / size);
       heuristic += Math.abs(solvedCol - col) + Math.abs(solvedRow - row);
@@ -40,105 +41,92 @@ const hamming = (solved: Puzzle, size: number) => (puzzle: Puzzle) => {
 };
 
 const linearConflict = (solved: PerNum, size: number) => (puzzle: Puzzle) => {
-  let solvedCol: number,
-    solvedRow: number,
-    solvedIndex: number,
-    nextSolvedIndex: number,
-    nextSolvedCol: number,
-    nextSolvedRow: number,
-    tile: number,
-    manhattanValue: number = 0,
-    nextTile: number,
-    minConflicts: number = 0;
+  let manhattanValue = 0;
+  let allConflicts = 0;
 
   for (let row = 0; row < size; row++) {
-    let conflicts: Array<[number, number]> = [];
-
     for (let col = 0; col < size; col++) {
-      tile = puzzle[row][col];
+      const tile = puzzle[row][col];
       if (!tile) continue;
 
-      solvedIndex = solved[tile];
-      solvedCol = solvedIndex % size;
-      solvedRow = Math.floor(solvedIndex / size);
+      const sCol = solved[tile] % 3;
+      const sRow = Math.floor(solved[tile] / 3);
+      manhattanValue += Math.abs(sCol - col) + Math.abs(sRow - row);
 
-      manhattanValue += Math.abs(solvedCol - col) + Math.abs(solvedRow - row);
-
-      if (Math.floor(tile / size) === solvedRow) {
-        for (let nextCol = col + 1; nextCol < size; nextCol++) {
-          nextTile = puzzle[row][nextCol];
-          if (!nextTile) continue;
-
-          nextSolvedIndex = solved[nextTile];
-          nextSolvedCol = nextSolvedIndex % size;
-          nextSolvedRow = Math.floor(nextSolvedIndex / size);
-
-          // if both tile should be in the same row and the next tile is before the current tile
-          if (nextSolvedRow === solvedRow && nextSolvedCol < solvedCol) {
-            conflicts.push([tile, nextTile], [nextTile, tile]);
+      let conflicts: Array<[number, number]> = [];
+      if (sRow === row) {
+        for (let colNext = 0; colNext < size; colNext++) {
+          const nextTile = puzzle[row][colNext];
+          if (nextTile === tile || !nextTile) continue;
+          const nextScol = solved[nextTile] % 3;
+          const nextSrow = Math.floor(solved[nextTile] / 3);
+          if (
+            nextSrow === sRow &&
+            ((col < colNext && sCol > nextScol) ||
+              (col > colNext && sCol < nextScol))
+          ) {
+            conflicts.push([tile, nextTile]);
           }
         }
       }
-    }
-    while (conflicts.length) {
-      const max = getMax(conflicts);
-      conflicts = conflicts.filter(d => d[0] !== max && d[1] !== max);
-      minConflicts++;
+      while (conflicts.length) {
+        const max = getMax(conflicts);
+        conflicts = conflicts.filter(d => d[0] !== max && d[1] !== max);
+        allConflicts++;
+      }
     }
   }
+
   for (let col = 0; col < size; col++) {
-    let conflicts: Array<[number, number]> = [];
-
     for (let row = 0; row < size; row++) {
-      tile = puzzle[row][col];
+      const tile = puzzle[row][col];
       if (!tile) continue;
 
-      solvedIndex = solved[puzzle[row][col]];
-      solvedCol = solvedIndex % size;
-      solvedRow = Math.floor(solvedIndex / size);
+      const sCol = solved[tile] % 3;
+      const sRow = Math.floor(solved[tile] / 3);
 
-      if (tile % size === solvedCol) {
-        for (let nextRow = row + 1; nextRow < size; nextRow++) {
-          nextTile = puzzle[nextRow][col];
-          if (!nextTile) continue;
-
-          nextSolvedIndex = solved[nextTile];
-          nextSolvedCol = nextSolvedIndex % size;
-          nextSolvedRow = Math.floor(nextSolvedIndex / size);
-
-          // if both tiles should be on the same column and the next tile is before the current tile
-          if (nextSolvedCol === solvedCol && nextSolvedRow < solvedRow) {
-            conflicts.push([tile, nextTile], [nextTile, tile]);
+      if (col === sCol) {
+        let conflicts: Array<[number, number]> = [];
+        for (let rowNext = 0; rowNext < size; rowNext++) {
+          const nextTile = puzzle[rowNext][col];
+          if (nextTile === tile || !nextTile) continue;
+          const nextScol = solved[nextTile] % 3;
+          const nextSrow = Math.floor(solved[nextTile] / 3);
+          if (
+            nextScol === sCol &&
+            ((row < rowNext && sRow > nextSrow) ||
+              (row > rowNext && sRow < nextSrow))
+          ) {
+            conflicts.push([tile, nextTile]);
           }
+        }
+        while (conflicts.length) {
+          const max = getMax(conflicts);
+          conflicts = conflicts.filter(d => d[0] !== max && d[1] !== max);
+          allConflicts++;
         }
       }
     }
-    while (conflicts.length) {
-      const max = getMax(conflicts);
-      conflicts = conflicts.filter(d => d[0] !== max && d[1] !== max);
-      minConflicts++;
-    }
   }
-
-  return manhattanValue + 2 * minConflicts;
+  return manhattanValue + 2 * allConflicts;
 };
 
 const getMax = (conflicts: Array<[number, number]>) => {
-  let maxValue = -1;
-  let maxConflict = 0;
-  const all = conflicts.reduce(
-    (a, cur) => {
-      if (a[cur[0]]) a[cur[0]].push(cur[1]);
-      else a[cur[0]] = [cur[1]];
+  const conflictsByValue = conflicts.reduce(
+    (a, conflict) => {
+      if (!a[conflict[0]]) a[conflict[0]] = 1;
+      else a[conflict[0]] += 1;
       return a;
     },
-    {} as { [id: number]: number[] }
+    {} as { [key: string]: number }
   );
-  for (const key in all) {
-    if (all[key].length > maxValue) {
-      maxConflict = +key;
-      maxValue = all[key].length;
+  let maxConflicts = 0;
+  let tile = 0;
+  for (const key in conflictsByValue) {
+    if (conflictsByValue[key] > maxConflicts) {
+      maxConflicts = conflictsByValue[key];
+      tile = +key;
     }
   }
-  return maxConflict;
+  return tile;
 };

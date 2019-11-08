@@ -51,8 +51,8 @@ const linearConflict = (solved: PerNum, size: number) => (puzzle: Puzzle) => {
       const tile = puzzle[row][col];
       if (!tile) continue;
 
-      const sCol = solved[tile] % 3;
-      const sRow = Math.floor(solved[tile] / 3);
+      const sCol = solved[tile] % size;
+      const sRow = Math.floor(solved[tile] / size);
       manhattanValue += Math.abs(sCol - col) + Math.abs(sRow - row);
 
       if (sRow === row) {
@@ -120,22 +120,3 @@ const linearConflict = (solved: PerNum, size: number) => (puzzle: Puzzle) => {
   return manhattanValue + 2 * allConflicts;
 };
 
-const getMax = (conflicts: Array<[number, number]>) => {
-  const conflictsByValue = conflicts.reduce(
-    (a, conflict) => {
-      if (!a[conflict[0]]) a[conflict[0]] = 1;
-      else a[conflict[0]] += 1;
-      return a;
-    },
-    {} as { [key: string]: number }
-  );
-  let maxConflicts = 0;
-  let tile = 0;
-  for (const key in conflictsByValue) {
-    if (conflictsByValue[key] > maxConflicts) {
-      maxConflicts = conflictsByValue[key];
-      tile = +key;
-    }
-  }
-  return tile;
-};

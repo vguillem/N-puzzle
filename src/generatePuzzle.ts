@@ -10,7 +10,11 @@ export const generatePuzzle = (solved: Puzzle, size: number) => {
   do {
     puzzle = createPuzzle(size);
   } while (!isSolvable(flatSolved, puzzle, size));
-	return [[3,2,6],[5,4,8],[1,0,7]]
+return [
+[0 , 3 , 7],
+[5 , 4 , 2],
+[1 , 6 , 8]
+];
   // return puzzle;
 };
 

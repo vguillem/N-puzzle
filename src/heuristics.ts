@@ -53,20 +53,18 @@ const linearConflict = (solved: PerNum, size: number) => (puzzle: Puzzle) => {
       const sRow = Math.floor(solved[tile] / 3);
       manhattanValue += Math.abs(sCol - col) + Math.abs(sRow - row);
 
-      if (sRow === row) {
+      if (row === sRow) {
         let conflicts: Array<[number, number]> = [];
         for (let colNext = 0; colNext < size; colNext++) {
           const nextTile = puzzle[row][colNext];
           if (nextTile === tile || !nextTile) continue;
+
           const nextScol = solved[nextTile] % 3;
           const nextSrow = Math.floor(solved[nextTile] / 3);
-          if (
-            nextSrow === sRow &&
-            ((col < colNext && sCol > nextScol) ||
-              (col > colNext && sCol < nextScol))
-          ) {
-            conflicts.push([tile, nextTile]);
-          }
+
+          const onSameRow = nextSrow === row;
+          const conflicting = col < colNext ? nextScol < sCol : sCol < nextScol;
+          if (onSameRow && conflicting) conflicts.push([tile, nextTile]);
         }
         while (conflicts.length) {
           const max = getMax(conflicts);
@@ -90,15 +88,13 @@ const linearConflict = (solved: PerNum, size: number) => (puzzle: Puzzle) => {
         for (let rowNext = 0; rowNext < size; rowNext++) {
           const nextTile = puzzle[rowNext][col];
           if (nextTile === tile || !nextTile) continue;
+
           const nextScol = solved[nextTile] % 3;
           const nextSrow = Math.floor(solved[nextTile] / 3);
-          if (
-            nextScol === sCol &&
-            ((row < rowNext && sRow > nextSrow) ||
-              (row > rowNext && sRow < nextSrow))
-          ) {
-            conflicts.push([tile, nextTile]);
-          }
+
+          const onSameCol = nextScol === col;
+          const conflicting = row < rowNext ? nextSrow < sRow : sRow < nextSrow;
+          if (onSameCol && conflicting) conflicts.push([tile, nextTile]);
         }
         while (conflicts.length) {
           const max = getMax(conflicts);

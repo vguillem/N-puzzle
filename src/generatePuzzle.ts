@@ -41,6 +41,8 @@ export const isSolvable = (solved: PerNum, grid: Puzzle, length: number) => {
   // solvable if grid length and inversion are both odd
   // even with 0 at end goal
   if (length % 2 === 1) return inversion % 2 === 0;
+
+	// TODO: this is not working V: we should fix it
   // solvable if grid length is even and
   // inversion is even and 0 line is even
   // or inversion is odd and 0 line is odd

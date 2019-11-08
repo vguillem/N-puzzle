@@ -14,8 +14,10 @@ export function getPuzzle(args: string[]) {
     throw new Error('file');
   }
 
-  const solvedPuzzle = generateSolvedPuzzle(config.size);
-  if (!inputString) return generatePuzzle(solvedPuzzle, config.size);
+  if (!inputString) {
+    const solvedPuzzle = generateSolvedPuzzle(config.size);
+    return generatePuzzle(solvedPuzzle, config.size);
+  }
 
   let puzzle: Puzzle;
   try {
@@ -24,13 +26,14 @@ export function getPuzzle(args: string[]) {
     throw new Error('file');
   }
 
+  const solvedPuzzle = generateSolvedPuzzle(config.size);
   const perNum = solvedPuzzle.flat().reduce((a, b, i) => {
     a[b] = i;
     return a;
   }, {});
 
-  if (!isSolvable(perNum, puzzle, config.size)) throw new Error('unsolvable');
-  else return puzzle;
+  // if (!isSolvable(perNum, puzzle, config.size)) throw new Error('unsolvable');
+  return puzzle;
 }
 
 function findFile(args: string[]) {

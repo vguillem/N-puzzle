@@ -98,7 +98,6 @@ it will only work with the astar algorithm`
 if (args.includes('--bench')) {
   runBench();
 } else {
-  printConfig();
   let puzzle;
   try {
     puzzle = getPuzzle(args);
@@ -109,5 +108,6 @@ if (args.includes('--bench')) {
       console.error(`${red}Error: ${reset}file is not valid`);
     process.exit(1);
   }
+  printConfig();
   runOnce(puzzle as Puzzle);
 }

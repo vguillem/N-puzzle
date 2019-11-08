@@ -50,8 +50,8 @@ const linearConflict = (solved: PerNum, size: number) => (puzzle: Puzzle) => {
       const tile = puzzle[row][col];
       if (!tile) continue;
 
-      const sCol = solved[tile] % 3;
-      const sRow = Math.floor(solved[tile] / 3);
+      const sCol = solved[tile] % size;
+      const sRow = Math.floor(solved[tile] / size);
       manhattanValue += Math.abs(sCol - col) + Math.abs(sRow - row);
 
       if (row === sRow) {
@@ -59,8 +59,8 @@ const linearConflict = (solved: PerNum, size: number) => (puzzle: Puzzle) => {
           const nextTile = puzzle[row][colNext];
           if (!nextTile) continue;
 
-          const nextScol = solved[nextTile] % 3;
-          const nextSrow = Math.floor(solved[nextTile] / 3);
+          const nextScol = solved[nextTile] % size;
+          const nextSrow = Math.floor(solved[nextTile] / size);
 
           const onSameRow = nextSrow === row;
           const conflicting = nextScol < sCol;
@@ -79,8 +79,8 @@ const linearConflict = (solved: PerNum, size: number) => (puzzle: Puzzle) => {
           const nextTile = puzzle[rowNext][col];
           if (!nextTile) continue;
 
-          const nextScol = solved[nextTile] % 3;
-          const nextSrow = Math.floor(solved[nextTile] / 3);
+          const nextScol = solved[nextTile] % size;
+          const nextSrow = Math.floor(solved[nextTile] / size);
 
           const onSameCol = nextScol === col;
           const conflicting = sRow > nextSrow;

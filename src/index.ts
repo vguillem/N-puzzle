@@ -40,7 +40,7 @@ if (isNaN(config.size)) {
 }
 
 if ((index = args.indexOf('--heuristics')) !== -1) {
-  const regexp = /linearConflict|manhattan|hamming/;
+  const regexp = /^linearConflict$|^manhattan$|^hamming$/;
   if (!args[index + 1]) {
     console.error(
       `${red}Error: ${reset}--heuristics requires a , separated list of heuristics (manhattan,hamming,linearConflict)`
@@ -58,7 +58,7 @@ if ((index = args.indexOf('--heuristics')) !== -1) {
 }
 
 if ((index = args.indexOf('--algorithms')) !== -1) {
-  const regexp = /astar|idastar/;
+  const regexp = /^astar$|^idastar$/;
   if (!args[index + 1]) {
     console.error(
       `${red}Error: ${reset}--algorithms requires a coma separated list of algorithms (astar,idastar)`
@@ -76,7 +76,7 @@ if ((index = args.indexOf('--algorithms')) !== -1) {
 }
 
 if ((index = args.indexOf('--search')) !== -1) {
-  const regexp = /greedy|uniform|normal/;
+  const regexp = /^greedy$|^uniform$|^normal$/;
   if (!args[index + 1]) {
     console.error(
       `${red}Error: ${reset}--search requires a coma separated list of searches (normal,greedy,uniform)

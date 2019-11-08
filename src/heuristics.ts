@@ -43,6 +43,8 @@ const hamming = (solved: Puzzle, size: number) => (puzzle: Puzzle) => {
 const linearConflict = (solved: PerNum, size: number) => (puzzle: Puzzle) => {
   let manhattanValue = 0;
   let allConflicts = 0;
+  let rows: number[][] = [];
+  let lines: number[][] = [];
 
   for (let row = 0; row < size; row++) {
     for (let col = 0; col < size; col++) {
@@ -54,60 +56,67 @@ const linearConflict = (solved: PerNum, size: number) => (puzzle: Puzzle) => {
       manhattanValue += Math.abs(sCol - col) + Math.abs(sRow - row);
 
       if (sRow === row) {
-        let conflicts: Array<[number, number]> = [];
-        for (let colNext = 0; colNext < size; colNext++) {
-          const nextTile = puzzle[row][colNext];
-          if (nextTile === tile || !nextTile) continue;
-          const nextScol = solved[nextTile] % 3;
-          const nextSrow = Math.floor(solved[nextTile] / 3);
-          if (
-            nextSrow === sRow &&
-            ((col < colNext && sCol > nextScol) ||
-              (col > colNext && sCol < nextScol))
-          ) {
-            conflicts.push([tile, nextTile]);
-          }
+        if (!lines[sRow]) {
+          lines[sRow] = [];
+
         }
-        while (conflicts.length) {
-          const max = getMax(conflicts);
-          conflicts = conflicts.filter(d => d[0] !== max && d[1] !== max);
-          allConflicts++;
+        lines[row].push(sCol);
+      }
+      if (sCol === col) {
+        if (!rows[sCol]) {
+          rows[sCol] = [];
+
         }
+        rows[sCol].push(sRow);
       }
     }
   }
 
-  for (let col = 0; col < size; col++) {
-    for (let row = 0; row < size; row++) {
-      const tile = puzzle[row][col];
-      if (!tile) continue;
+  [...rows, ...lines].forEach((testArray) => {
+    if (!testArray) {
+      return;
+    }
+    let cf: Array<Set<number> | null> = [];
+    testArray.forEach((test, index) => {
+      if (!cf[test]) {
+        cf[test] = new Set();
+      }
 
-      const sCol = solved[tile] % 3;
-      const sRow = Math.floor(solved[tile] / 3);
-
-      if (col === sCol) {
-        let conflicts: Array<[number, number]> = [];
-        for (let rowNext = 0; rowNext < size; rowNext++) {
-          const nextTile = puzzle[rowNext][col];
-          if (nextTile === tile || !nextTile) continue;
-          const nextScol = solved[nextTile] % 3;
-          const nextSrow = Math.floor(solved[nextTile] / 3);
-          if (
-            nextScol === sCol &&
-            ((row < rowNext && sRow > nextSrow) ||
-              (row > rowNext && sRow < nextSrow))
-          ) {
-            conflicts.push([tile, nextTile]);
+      for (let i = index + 1; i < testArray.length; i++) {
+        if (test > testArray[i]) {
+          cf[test].add(testArray[i])
+          if (!cf[testArray[i]]) {
+            cf[testArray[i]] = new Set();
           }
-        }
-        while (conflicts.length) {
-          const max = getMax(conflicts);
-          conflicts = conflicts.filter(d => d[0] !== max && d[1] !== max);
-          allConflicts++;
+          cf[testArray[i]].add(test);
         }
       }
+    });
+
+    let biggerConflictIndex = 0;
+
+    const haveConflict = () => {
+
+      return cf.reduce((acc, test, index) => {
+        if (test && test.size > acc) {
+          acc = test.size;
+          biggerConflictIndex = index;
+        }
+        return acc;
+      }, 0)
+    };
+
+    while (haveConflict()) {
+      allConflicts += 1;
+
+      cf[biggerConflictIndex].forEach(test => {
+        cf[test].delete(biggerConflictIndex)
+      });
+      cf[biggerConflictIndex] = null;
     }
-  }
+
+  });
+
   return manhattanValue + 2 * allConflicts;
 };
 

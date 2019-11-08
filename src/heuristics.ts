@@ -55,16 +55,17 @@ const linearConflict = (solved: PerNum, size: number) => (puzzle: Puzzle) => {
       manhattanValue += Math.abs(sCol - col) + Math.abs(sRow - row);
 
       if (row === sRow) {
-        for (let colNext = 0; colNext < size; colNext++) {
+        for (let colNext = col + 1; colNext < size; colNext++) {
           const nextTile = puzzle[row][colNext];
-          if (nextTile === tile || !nextTile) continue;
+          if (!nextTile) continue;
 
           const nextScol = solved[nextTile] % 3;
           const nextSrow = Math.floor(solved[nextTile] / 3);
 
           const onSameRow = nextSrow === row;
-          const conflicting = col < colNext ? nextScol < sCol : sCol < nextScol;
-          if (onSameRow && conflicting) conflicts.push([tile, nextTile]);
+          const conflicting = nextScol < sCol;
+          if (onSameRow && conflicting)
+            conflicts.push([tile, nextTile], [nextTile, tile]);
         }
         while (conflicts.length) {
           const max = getMax(conflicts);
@@ -74,21 +75,22 @@ const linearConflict = (solved: PerNum, size: number) => (puzzle: Puzzle) => {
       }
 
       if (col === sCol) {
-        for (let rowNext = 0; rowNext < size; rowNext++) {
+        for (let rowNext = row + 1; rowNext < size; rowNext++) {
           const nextTile = puzzle[rowNext][col];
-          if (nextTile === tile || !nextTile) continue;
+          if (!nextTile) continue;
 
           const nextScol = solved[nextTile] % 3;
           const nextSrow = Math.floor(solved[nextTile] / 3);
 
           const onSameCol = nextScol === col;
-          const conflicting = row < rowNext ? nextSrow < sRow : sRow < nextSrow;
-          if (onSameCol && conflicting) conflicts.push([tile, nextTile]);
+          const conflicting = sRow > nextSrow;
+          if (onSameCol && conflicting)
+            conflicts.push([tile, nextTile], [nextTile, tile]);
         }
         while (conflicts.length) {
           const max = getMax(conflicts);
           conflicts = conflicts.filter(d => d[0] !== max && d[1] !== max);
-					allConflicts++;
+          allConflicts++;
         }
       }
     }

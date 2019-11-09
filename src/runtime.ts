@@ -3,6 +3,7 @@ import { generateSolvedPuzzle, generatePuzzle } from './generatePuzzle';
 import { initializeHeuristics } from './heuristics';
 import { logOnce, logBench, logPuzzle } from './logger';
 import { config } from './config';
+import { getAllSteps } from './utils';
 
 const generateEmptyState = () => ({
   allSolvedTimes: [],
@@ -61,6 +62,9 @@ const computeOnce = (
     search
   });
   const solveTime = Date.now() - time;
+  if (config.showSteps){
+    state[type].steps = getAllSteps(puzzle, node.path);
+  }
   state[type].solveTime = solveTime;
   state[type].createdNodes = createdNodes;
   state[type].numNodes = numNodes;

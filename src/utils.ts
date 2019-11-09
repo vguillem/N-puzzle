@@ -1,3 +1,6 @@
+import { config } from './config';
+import { logPuzzle } from './logger';
+
 type WrongMove = {
   [move in Move]: (x: number, y: number, length: number) => boolean;
 };
@@ -89,4 +92,34 @@ export const getMinFromPool = (pool: { [x: number]: sNode[] }) => {
     if (+key < minKey) minKey = +key;
   }
   return minKey;
+};
+
+const clonePuzzle = (puzzle: Puzzle) => puzzle.map(line => line.slice());
+
+const getZeroPos = (puzzle: Puzzle) => {
+  for (let line = 0; line < puzzle.length; line++) {
+    for (let col = 0; col < puzzle.length; col++) {
+      if (puzzle[line][col] === 0) {
+        return { zeroX: col, zeroY: line };
+      }
+    }
+  }
+  return { zeroX: 0, zeroY: 0 };
+};
+
+export const getAllSteps = (initialStep: Puzzle, path: Move[]) => {
+  const allSteps = [initialStep];
+  let { zeroX, zeroY } = getZeroPos(initialStep);
+  let lastPuzzle = initialStep;
+
+  path.forEach(move => {
+    const newPuzzle = clonePuzzle(lastPuzzle);
+    [zeroX, zeroY] = switcher[move](newPuzzle, zeroX, zeroY);
+    allSteps.push(newPuzzle);
+    lastPuzzle = newPuzzle;
+  });
+
+  allSteps.forEach(step => logPuzzle(step, config.size));
+
+  return allSteps;
 };

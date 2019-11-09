@@ -16,6 +16,7 @@ interface sNode {
 type Pool = { [id in string]: sNode };
 
 type heuristics = 'hamming' | 'linearConflict' | 'manhattan';
+
 type Heuristic = (puzzle: Puzzle) => number;
 
 type algorithms = 'astar' | 'idastar';
@@ -38,6 +39,7 @@ interface HeuristicState {
   maxNumNodes: number;
   allMaxNumNodes: number[];
   path: Move[];
+  steps?: Puzzle[];
 }
 
 type PerNum = { [num: number]: number };

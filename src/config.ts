@@ -3,13 +3,15 @@ interface Config {
   algorithms: algorithms[];
   search: searchStyle[];
   size: number;
+  showSteps: boolean;
 }
 
 export const config: Config = {
   heuristics: ['manhattan', 'hamming', 'linearConflict'],
   algorithms: ['astar'],
   search: ['normal'],
-  size: 3
+  size: 3,
+  showSteps: false
 };
 
 const white = '\x1b[37;1m';

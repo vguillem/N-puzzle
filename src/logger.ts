@@ -1,13 +1,13 @@
 import { config } from './config';
 
-const blue = '\x1b[1;36m';
-const yellow = '\x1b[1;33m';
-const yellowSmooth = '\x1b[0;3;33m';
-const reset = '\x1b[0m';
-const white = '\x1b[1;37m';
-const greenBold = '\x1b[32;1m';
-const violet = '\x1b[35;1m';
-const red = '\x1b[31;1m';
+export const blue = '\x1b[1;36m';
+export const yellow = '\x1b[1;33m';
+export const yellowSmooth = '\x1b[0;3;33m';
+export const reset = '\x1b[0m';
+export const white = '\x1b[1;37m';
+export const greenBold = '\x1b[32;1m';
+export const violet = '\x1b[35;1m';
+export const red = '\x1b[31;1m';
 
 export function logBench(state: State) {
   console.clear();
@@ -56,13 +56,13 @@ ${blue}min:                 ${reset}${formatNode(getMin(state.allCreatedNodes))}
 ${blue}max:                 ${reset}${formatNode(getMax(state.allCreatedNodes))}
 
    ${violet} ALL EXPLORED NODES ${reset}
-${blue}average:             ${reset}${formatNode(getAvg(state.allNumNodes))}
+${blue}average:             ${reset}${formatNode(getAvg(state.allNbStudiedNodes))}
 ${blue}standard deviation:  ${reset}${formatNode(
-    getStandardDeviation(state.allNumNodes)
+    getStandardDeviation(state.allNbStudiedNodes)
   )}
-${blue}min:                 ${reset}${formatNode(getMin(state.allNumNodes))}
+${blue}min:                 ${reset}${formatNode(getMin(state.allNbStudiedNodes))}
 ${blue}max:                 ${reset}${formatNode(
-    getMax(state.allNumNodes)
+    getMax(state.allNbStudiedNodes)
   )}`.trim();
 }
 
@@ -130,7 +130,7 @@ ${violet}Result for ${algorithm} with ${heuristic} in ${search} search:${reset}
 ${greenBold}solved in             ${white}${parseTime(data.solveTime)}${reset}
 ${greenBold}moves                 ${white}${data.path.length}${reset}
 ${greenBold}max nodes in memory   ${white}${data.maxNumNodes}${reset}
-${greenBold}total explored nodes  ${white}${data.numNodes}${reset}
+${greenBold}total explored nodes  ${white}${data.nbStudiedNodes}${reset}
 ${greenBold}total created nodes   ${white}${data.createdNodes}${reset}
 ${greenBold}path                  ${white}${formatPath(data.path)}${reset}
 `);

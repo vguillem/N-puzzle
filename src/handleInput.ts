@@ -50,7 +50,7 @@ function parse(file: string) {
 
   const size = Number(data[0]);
   const firstLineRemoved = data.slice(1);
-  if (isNaN(size) || size < 3 || size > 6 || size !== firstLineRemoved.length)
+  if (isNaN(size) || size < 3 || size > 5 || size !== firstLineRemoved.length)
     throw null;
   config.size = size;
 

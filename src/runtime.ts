@@ -6,12 +6,12 @@ import { config } from './config';
 import { getAllSteps } from './utils';
 
 const generateEmptyState = () => ({
+  solveTime: 0,
   allSolvedTimes: [],
   createdNodes: 0,
-  solveTime: 0,
   allCreatedNodes: [],
-  numNodes: 0,
-  allNumNodes: [],
+  nbStudiedNodes: 0,
+  allNbStudiedNodes: [],
   maxNumNodes: 0,
   allMaxNumNodes: [],
   path: []
@@ -58,7 +58,7 @@ const computeOnce = (
   search: searchStyle
 ) => {
   const time = Date.now();
-  const { node, numNodes, maxNumNodes, createdNodes } = algorithms[algorithm]({
+  const { node, nbStudiedNodes: numNodes, maxNumNodes, createdNodes } = algorithms[algorithm]({
     puzzle: puzzle,
     heuristic,
     search
@@ -69,7 +69,7 @@ const computeOnce = (
   }
   state[type].solveTime = solveTime;
   state[type].createdNodes = createdNodes;
-  state[type].numNodes = numNodes;
+  state[type].nbStudiedNodes = numNodes;
   state[type].maxNumNodes = maxNumNodes;
   state[type].path = node.path;
 };
@@ -97,7 +97,7 @@ const computeBench = (
   type: heuristics
 ) => {
   const time = Date.now();
-  const { numNodes, maxNumNodes, createdNodes } = algorithms.astar({
+  const { nbStudiedNodes: numNodes, maxNumNodes, createdNodes } = algorithms.astar({
     puzzle: puzzle,
     heuristic,
     search: 'normal'
@@ -107,8 +107,8 @@ const computeBench = (
   state[type].solveTime = solveTime;
   state[type].createdNodes = createdNodes;
   state[type].allCreatedNodes.push(createdNodes);
-  state[type].numNodes = numNodes;
-  state[type].allNumNodes.push(numNodes);
+  state[type].nbStudiedNodes = numNodes;
+  state[type].allNbStudiedNodes.push(numNodes);
   state[type].maxNumNodes = maxNumNodes;
   state[type].allMaxNumNodes.push(maxNumNodes);
 };

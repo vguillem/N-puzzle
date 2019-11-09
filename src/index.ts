@@ -14,7 +14,7 @@ const USAGE = `
 ${white}usage: ./run [OPTIONS] [FILE?]
 
 OPTIONS:
-${green}--size       ${reset}   specify the size of the puzzle
+${green}--size       ${reset}   specify the size of the puzzle (3-5)
 ${green}--algorithms ${reset}   list of coma (',') separated algorithms (astar,idastar)
 ${green}--search     ${reset}   list of coma (',') separated search (normal,greedy,uniform)
 ${green}--heuristics ${reset}   list of coma (',') separated heuristics (manhattan,hamming,linearConflict,cornerTile,combined)
@@ -37,6 +37,10 @@ if ((index = args.indexOf('--size')) !== -1) {
 }
 if (isNaN(config.size)) {
   console.error(`${red}Error: ${reset}--size requires a number`);
+  process.exit(1);
+}
+if (config.size < 3 || config.size > 5) {
+  console.error(`${red}Error: ${reset}--size must be between 3 and 5`);
   process.exit(1);
 }
 

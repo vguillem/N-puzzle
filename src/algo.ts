@@ -17,7 +17,7 @@ interface Props {
 interface Return {
   node: sNode;
   createdNodes: number;
-  numNodes: number;
+  nbStudiedNodes: number;
   maxNumNodes: number;
 }
 
@@ -38,32 +38,28 @@ export const astar = ({ puzzle, heuristic, search }: Props): Return => {
   // data
   let createdNodes = 1;
   let allCurrentNodes = 1;
-  let numNodes = 0;
+  let nbStudiedNodes = 0;
   let maxNumNodes = 1;
 
   while (Object.keys(toStudy).length) {
     // we get the smallest value node
     const minValue = getMinFromPool(toStudy);
-    const currentNode = toStudy[minValue]
-      // i'm not sure about this sort, TODO: discuss this with mr Vianney
-      .sort((a, b) => a.level - b.level)
-      .pop() as sNode;
+    const currentNode = toStudy[minValue].shift() as sNode;
 
     // as its an object, we must delete the key when its pool of node is empty
     if (!toStudy[minValue].length) delete toStudy[minValue];
 
-    // some data stuff, TODO: rename these its not clear what those represent
     allCurrentNodes -= 1;
     maxNumNodes = Math.max(allCurrentNodes, maxNumNodes);
-    numNodes++;
+
+    nbStudiedNodes++;
 
     // if my heuristic is 0, i am done
-    // TODO: in case we want to make this more reliable (not based on the heuristic), check that its id matches the solved id
     if (!currentNode.heuristic) {
       return {
         node: currentNode,
         createdNodes,
-        numNodes,
+        nbStudiedNodes,
         maxNumNodes
       };
     }
@@ -83,12 +79,10 @@ export const astar = ({ puzzle, heuristic, search }: Props): Return => {
     const lastMove: Move = prevPath[prevPath.length - 1];
 
     (['up', 'left', 'right', 'down'] as Move[]).forEach(move => {
-      // dont move where it shouldnt
       const badMove = badMoves.has(`${lastMove}|${move}`);
       const shouldNotMove = wrongMove[move](prevX, prevY, config.size);
       if (badMove || shouldNotMove) return;
 
-      // create the new node
       const newPuzzle = prevPuzzle.map(l => l.slice());
       const [newX, newY] = switcher[move](newPuzzle, prevX, prevY);
       const newNode = createNode(
@@ -100,14 +94,13 @@ export const astar = ({ puzzle, heuristic, search }: Props): Return => {
         move
       );
 
-      // TODO: rename ?
       createdNodes++;
 
       // value is either f(x), g(x) or h(x) depending on the search style (normal, uniform or greedy)
       const value = getValue(newNode);
 
       // if node has already been studied and its value is less than the new node value, do not study the node
-      if (studied[newNode.id] && studied[newNode.id] < value) return;
+      if (studied[newNode.id] && studied[newNode.id] <= value) return;
 
       // if the pool is empty, create a new one, else, push the new created node to the pool
       if (!toStudy[value]) toStudy[value] = [newNode];
@@ -130,14 +123,13 @@ export const idastar = ({ puzzle, heuristic, search }: Props): Return => {
 
   const [x, y] = findEmptyBlock(puzzle);
   let parentNode = createNode(puzzle, x, y, [], -1);
-	const getValue = getGetter[search];
+  const getValue = getGetter[search];
 
-let maxDepth = getValue(parentNode);
+  let maxDepth = getValue(parentNode);
 
   // data
   let createdNodes = 1;
-  let numNodes = 0;
-  let allCurrentNodes = 1;
+  let nbStudiedNodes = 0;
   let maxNumNodes = 1;
 
   while (true) {
@@ -150,24 +142,22 @@ let maxDepth = getValue(parentNode);
       // get the last node created and go as deep as we can
       const currentNode = toStudy.pop() as sNode;
 
-      // data stuff
-      allCurrentNodes -= 1;
-      numNodes += 1;
-      maxNumNodes = Math.max(allCurrentNodes, maxNumNodes);
+      maxNumNodes = Math.max(toStudy.length, maxNumNodes);
+
+      nbStudiedNodes += 1;
 
       // if my heuristic is 0 then we are done
       if (!currentNode.heuristic) {
         return {
           node: currentNode,
           createdNodes,
-          numNodes,
+          nbStudiedNodes,
           maxNumNodes
         };
       }
 
       // we put the current node inside the studied pool
       studied[currentNode.id] = getValue(currentNode);
-
 
       const {
         path: prevPath,
@@ -202,10 +192,10 @@ let maxDepth = getValue(parentNode);
           createdNodes += 1;
 
           // we should study this node if its f(x) is less than the depth we are exploring
-					const value = getValue(newNode);
+          const value = getValue(newNode);
           if (value <= maxDepth) {
             // if i already have studied this node and my new node has a f(x) higher than the previous one, we should not study this node
-            if (studied[newNode.id] && studied[newNode.id] < value)
+            if (studied[newNode.id] && studied[newNode.id] <= value)
               return null;
             return newNode;
           }
@@ -216,7 +206,6 @@ let maxDepth = getValue(parentNode);
         .filter(Boolean) as sNode[]).sort((a, b) => getValue(b) - getValue(a));
 
       toStudy.push(...newNodes);
-      allCurrentNodes += newNodes.length;
     }
     maxDepth = nextMaxDepth;
   }

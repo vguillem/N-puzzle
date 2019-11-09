@@ -37,8 +37,8 @@ interface HeuristicState {
   allCreatedNodes: number[];
   solveTime: number;
   allSolvedTimes: number[];
-  numNodes: number;
-  allNumNodes: number[];
+  nbStudiedNodes: number;
+  allNbStudiedNodes: number[];
   maxNumNodes: number;
   allMaxNumNodes: number[];
   path: Move[];

@@ -20,7 +20,9 @@ const generateEmptyState = () => ({
 const state: State = {
   manhattan: generateEmptyState(),
   linearConflict: generateEmptyState(),
-  hamming: generateEmptyState()
+  hamming: generateEmptyState(),
+  cornerTile: generateEmptyState(),
+  combined: generateEmptyState()
 };
 
 export const runOnce = (puzzle: Puzzle) => {
@@ -62,7 +64,7 @@ const computeOnce = (
     search
   });
   const solveTime = Date.now() - time;
-  if (config.showSteps){
+  if (config.showSteps) {
     state[type].steps = getAllSteps(puzzle, node.path);
   }
   state[type].solveTime = solveTime;

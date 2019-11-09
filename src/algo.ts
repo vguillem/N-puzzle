@@ -22,7 +22,7 @@ interface Return {
 }
 
 export const astar = ({ puzzle, heuristic, search }: Props): Return => {
-  const createNode = getCreateNode(heuristic); // this is a function
+  const createNode = getCreateNode(heuristic);
 
   const getValue = getGetter[search];
   const [x, y] = findEmptyBlock(puzzle);
@@ -125,14 +125,14 @@ const getGetter = {
   uniform: (node: sNode) => node.level
 };
 
-export const idastar = ({ puzzle, heuristic }: Props): Return => {
+export const idastar = ({ puzzle, heuristic, search }: Props): Return => {
   const createNode = getCreateNode(heuristic);
 
   const [x, y] = findEmptyBlock(puzzle);
   let parentNode = createNode(puzzle, x, y, [], -1);
+	const getValue = getGetter[search];
 
-  // we want to explore deep like the heuristic of the parent node
-  let maxDepth = parentNode.heuristic + 1;
+let maxDepth = getValue(parentNode);
 
   // data
   let createdNodes = 1;
@@ -146,13 +146,9 @@ export const idastar = ({ puzzle, heuristic }: Props): Return => {
     const toStudy: sNode[] = [parentNode];
     const studied: { [id: string]: number } = {};
 
-    // while we have nodes to study, continue
     while (toStudy.length) {
       // get the last node created and go as deep as we can
-      // TODO: should we order this one ? and is the sort correct ?
-      const currentNode = toStudy
-        .sort((a, b) => a.total - b.total)
-        .pop() as sNode;
+      const currentNode = toStudy.pop() as sNode;
 
       // data stuff
       allCurrentNodes -= 1;
@@ -160,9 +156,6 @@ export const idastar = ({ puzzle, heuristic }: Props): Return => {
       maxNumNodes = Math.max(allCurrentNodes, maxNumNodes);
 
       // if my heuristic is 0 then we are done
-      // TODO: we could check that the ids of the node and the solved puzzle matches instead of checking the heuristic
-      // it might optimize in some cases when we compute the heuristic although we dont really need it (uniform search)
-      // or when doing a greedy search we dont really need the current level
       if (!currentNode.heuristic) {
         return {
           node: currentNode,
@@ -173,7 +166,8 @@ export const idastar = ({ puzzle, heuristic }: Props): Return => {
       }
 
       // we put the current node inside the studied pool
-      studied[currentNode.id] = currentNode.total;
+      studied[currentNode.id] = getValue(currentNode);
+
 
       const {
         path: prevPath,
@@ -185,42 +179,45 @@ export const idastar = ({ puzzle, heuristic }: Props): Return => {
 
       const lastMove: Move = prevPath[prevPath.length - 1];
 
-      (['up', 'left', 'right', 'down'] as Move[]).forEach(move => {
-        // do not create useless nodes
-        const badMove = badMoves.has(`${lastMove}|${move}`);
-        const shouldNotMove = wrongMove[move](prevX, prevY, config.size);
-        if (badMove || shouldNotMove) return;
+      const newNodes = ((['up', 'left', 'right', 'down'] as Move[])
+        .map(move => {
+          // do not create useless nodes
+          const badMove = badMoves.has(`${lastMove}|${move}`);
+          const shouldNotMove = wrongMove[move](prevX, prevY, config.size);
+          if (badMove || shouldNotMove) return null;
 
-        // create the new node
-        const newPuzzle = prevPuzzle.map(l => l.slice());
-        const [newX, newY] = switcher[move](newPuzzle, prevX, prevY);
-        const newNode = createNode(
-          newPuzzle,
-          newX,
-          newY,
-          prevPath,
-          prevLevel,
-          move
-        );
+          // create the new node
+          const newPuzzle = prevPuzzle.map(l => l.slice());
+          const [newX, newY] = switcher[move](newPuzzle, prevX, prevY);
+          const newNode = createNode(
+            newPuzzle,
+            newX,
+            newY,
+            prevPath,
+            prevLevel,
+            move
+          );
 
-        // TODO: renaming ?
-        createdNodes += 1;
+          // TODO: renaming ?
+          createdNodes += 1;
 
-        // TODO: verify that all those values must be based on f(x) and not g(x) or h(x), specifically if we make a specific search
-
-        // if i already have studied this node and my new node has a f(x) higher than the previous one, we should not study this node
-        if (studied[newNode.id] && studied[newNode.id] < newNode.total) return;
-
-        // we should study this node if its f(x) is less than the depth we are exploring
-        if (newNode.total < maxDepth) {
-          toStudy.push(newNode);
-          allCurrentNodes += 1;
-        } else {
+          // we should study this node if its f(x) is less than the depth we are exploring
+					const value = getValue(newNode);
+          if (value <= maxDepth) {
+            // if i already have studied this node and my new node has a f(x) higher than the previous one, we should not study this node
+            if (studied[newNode.id] && studied[newNode.id] < value)
+              return null;
+            return newNode;
+          }
           // if we should not study this node, the next max depth should be the one with the smallest f(x)
-          nextMaxDepth = Math.min(nextMaxDepth, newNode.total);
-        }
-      });
+          nextMaxDepth = Math.min(nextMaxDepth, value);
+          return null;
+        })
+        .filter(Boolean) as sNode[]).sort((a, b) => getValue(b) - getValue(a));
+
+      toStudy.push(...newNodes);
+      allCurrentNodes += newNodes.length;
     }
-    maxDepth = nextMaxDepth + 1;
+    maxDepth = nextMaxDepth;
   }
 };

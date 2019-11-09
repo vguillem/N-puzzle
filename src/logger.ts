@@ -94,7 +94,7 @@ function formatMsValue(str: string | number) {
 
 function parseTime(time: number) {
   if (time < 1000) return `${time}ms`;
-  let seconds = time / 1000;
+  let seconds = Math.floor(time / 1000);
   const minutes = Math.floor(seconds / 60);
   seconds = seconds % 60;
   return minutes ? `${minutes}m ${seconds}s` : `${seconds}s`;

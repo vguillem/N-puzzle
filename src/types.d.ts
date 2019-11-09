@@ -15,7 +15,12 @@ interface sNode {
 
 type Pool = { [id in string]: sNode };
 
-type heuristics = 'hamming' | 'linearConflict' | 'manhattan';
+type heuristics =
+  | 'hamming'
+  | 'linearConflict'
+  | 'manhattan'
+  | 'cornerTile'
+  | 'combined';
 
 type Heuristic = (puzzle: Puzzle) => number;
 
@@ -23,11 +28,9 @@ type algorithms = 'astar' | 'idastar';
 
 type searchStyle = 'normal' | 'greedy' | 'uniform';
 
-interface State {
-  manhattan: HeuristicState;
-  linearConflict: HeuristicState;
-  hamming: HeuristicState;
-}
+type State = {
+  [heuristic in heuristics]: HeuristicState;
+};
 
 interface HeuristicState {
   createdNodes: number;

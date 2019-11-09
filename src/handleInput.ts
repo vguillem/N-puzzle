@@ -32,7 +32,7 @@ export function getPuzzle(args: string[]) {
     return a;
   }, {});
 
-  // if (!isSolvable(perNum, puzzle, config.size)) throw new Error('unsolvable');
+  if (!isSolvable(perNum, puzzle, config.size)) throw new Error('unsolvable');
   return puzzle;
 }
 

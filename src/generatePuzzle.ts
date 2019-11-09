@@ -42,11 +42,9 @@ export const isSolvable = (solved: PerNum, grid: Puzzle, length: number) => {
   // even with 0 at end goal
   if (length % 2 === 1) return inversion % 2 === 0;
 
-	// TODO: this is not working V: we should fix it
-  // solvable if grid length is even and
-  // inversion is even and 0 line is even
-  // or inversion is odd and 0 line is odd
-  const zeroPosition = Math.floor(gridValues.indexOf(0) / length) + 1;
+	// if the line of 0 and the inversion have the same parity, then the puzzle is solvable
+	// on an even puzzle size
+  const zeroPosition = Math.floor(gridValues.indexOf(0) / length);
   return inversion % 2 === zeroPosition % 2;
 };
 

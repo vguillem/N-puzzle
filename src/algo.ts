@@ -3,7 +3,9 @@ import {
   switcher,
   badMoves,
   getCreateNode,
-  findEmptyBlock
+  getGetter,
+  findEmptyBlock,
+  Queue
 } from './utils';
 import { config } from './config';
 
@@ -20,43 +22,13 @@ interface Return {
   maxNumNodes: number;
 }
 
-class Queue {
-	pool: {[value: number]: sNode[] };
-	getValue: (node: sNode) => number;
-
-	public constructor(firstNode: sNode, search: searchStyle) {
-  	this.getValue = getGetter[search];
-		this.pool = { [this.getValue(firstNode)]: [firstNode] };
-	}
-
-	public pop(): sNode {
-		return this.pool.pop() as sNode;
-	}
-
-	public insert(node: sNode) {
-		const value = this.getValue(node);
-		const index = this.findNodeIndex(value);
-		(node as ExtendedNode).defaultValue = value;
-		this.pool.splice(index, 0, node as ExtendedNode);
-	}
-
-  private findNodeIndex(value: number) {
-		let i;
-		for (i = this.pool.length - 1; i > 0; i--) {
-			if (this.pool[i].defaultValue > value) break;
-		}
-		return i;
-  }
-
-}
-
 export const astar = ({ puzzle, heuristic, search }: Props): Return => {
   const createNode = getCreateNode(heuristic);
 
   const [x, y] = findEmptyBlock(puzzle);
   const firstNode = createNode(puzzle, x, y, [], -1);
 
-	const toStudy = new Queue(firstNode, search);
+  const toStudy = new Queue(firstNode, search);
   const studied: Set<string> = new Set();
 
   let createdNodes = 1;
@@ -64,9 +36,9 @@ export const astar = ({ puzzle, heuristic, search }: Props): Return => {
   let nbStudiedNodes = 0;
   let maxNumNodes = 1;
 
-	// its true here because we know the puzzle we got from above is solvable
+  // its true here because we know the puzzle we got from above is solvable
   while (true) {
-		const currentNode = toStudy.pop();
+    const currentNode = toStudy.pop();
 
     allCurrentNodes--;
     maxNumNodes = Math.max(allCurrentNodes, maxNumNodes);
@@ -115,15 +87,9 @@ export const astar = ({ puzzle, heuristic, search }: Props): Return => {
       createdNodes++;
       allCurrentNodes++;
 
-			toStudy.insert(newNode);
+      toStudy.insert(newNode);
     });
   }
-};
-
-const getGetter = {
-  normal: (node: sNode) => node.total,
-  greedy: (node: sNode) => node.heuristic,
-  uniform: (node: sNode) => node.level
 };
 
 export const idastar = ({ puzzle, heuristic, search }: Props): Return => {
@@ -179,12 +145,10 @@ export const idastar = ({ puzzle, heuristic, search }: Props): Return => {
 
       const newNodes = ((['up', 'left', 'right', 'down'] as Move[])
         .map(move => {
-          // do not create useless nodes
           const badMove = badMoves.has(`${lastMove}|${move}`);
           const shouldNotMove = wrongMove[move](prevX, prevY, config.size);
           if (badMove || shouldNotMove) return null;
 
-          // create the new node
           const newPuzzle = prevPuzzle.map(l => l.slice());
           const [newX, newY] = switcher[move](newPuzzle, prevX, prevY);
           const newNode = createNode(
@@ -198,15 +162,12 @@ export const idastar = ({ puzzle, heuristic, search }: Props): Return => {
 
           createdNodes += 1;
 
-          // we should study this node if its f(x) is less than the depth we are exploring
           const value = getValue(newNode);
           if (value <= maxDepth) {
-            // if i already have studied this node and my new node has a f(x) higher than the previous one, we should not study this node
             if (studied[newNode.id] && studied[newNode.id] <= value)
               return null;
             return newNode;
           }
-          // if we should not study this node, the next max depth should be the one with the smallest f(x)
           nextMaxDepth = Math.min(nextMaxDepth, value);
           return null;
         })

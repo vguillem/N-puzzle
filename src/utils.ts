@@ -123,3 +123,57 @@ export const getAllSteps = (initialStep: Puzzle, path: Move[]) => {
 
   return allSteps;
 };
+
+export class Queue {
+  pool: { [value: number]: sNode[] };
+  getValue: (node: sNode) => number;
+  getPlacementValue: (node: sNode) => number;
+  smallestPool: number;
+
+  public constructor(firstNode: sNode, search: searchStyle) {
+    this.getValue = getGetter[search];
+    this.getPlacementValue = getPlacementGetter[search];
+    this.pool = { [this.getValue(firstNode)]: [firstNode] };
+    this.smallestPool = this.getValue(firstNode);
+  }
+
+  public pop(): sNode {
+    const node = this.pool[this.smallestPool].pop() as sNode;
+    if (!this.pool[this.smallestPool].length) this.smallestPool = getMinFromPool(this.pool);
+    return node;
+  }
+
+  public insert(node: sNode) {
+    const value = this.getValue(node);
+    this.smallestPool = Math.min(this.smallestPool, value);
+    if (!this.pool[value]) {
+      this.pool[value] = [node];
+    } else {
+      const index = this.findNodeIndex(
+        this.pool[value],
+        this.getPlacementValue(node)
+      );
+      this.pool[value].splice(index, 0, node);
+    }
+  }
+
+  private findNodeIndex(stack: sNode[], value: number) {
+    let i;
+    for (i = stack.length - 1; i > 0; i--) {
+      if (this.getPlacementValue(stack[i]) > value) break;
+    }
+    return i;
+  }
+}
+
+export const getGetter = {
+  normal: (node: sNode) => node.total,
+  greedy: (node: sNode) => node.heuristic,
+  uniform: (node: sNode) => node.level
+};
+
+const getPlacementGetter = {
+  normal: (node: sNode) => node.heuristic,
+  greedy: (node: sNode) => node.heuristic,
+  uniform: (node: sNode) => node.level
+};

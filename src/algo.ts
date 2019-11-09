@@ -1,7 +1,6 @@
 import {
   wrongMove,
   switcher,
-  getMinFromPool,
   badMoves,
   getCreateNode,
   findEmptyBlock
@@ -21,15 +20,43 @@ interface Return {
   maxNumNodes: number;
 }
 
+class Queue {
+	pool: {[value: number]: sNode[] };
+	getValue: (node: sNode) => number;
+
+	public constructor(firstNode: sNode, search: searchStyle) {
+  	this.getValue = getGetter[search];
+		this.pool = { [this.getValue(firstNode)]: [firstNode] };
+	}
+
+	public pop(): sNode {
+		return this.pool.pop() as sNode;
+	}
+
+	public insert(node: sNode) {
+		const value = this.getValue(node);
+		const index = this.findNodeIndex(value);
+		(node as ExtendedNode).defaultValue = value;
+		this.pool.splice(index, 0, node as ExtendedNode);
+	}
+
+  private findNodeIndex(value: number) {
+		let i;
+		for (i = this.pool.length - 1; i > 0; i--) {
+			if (this.pool[i].defaultValue > value) break;
+		}
+		return i;
+  }
+
+}
+
 export const astar = ({ puzzle, heuristic, search }: Props): Return => {
   const createNode = getCreateNode(heuristic);
 
-  const getValue = getGetter[search];
   const [x, y] = findEmptyBlock(puzzle);
   const firstNode = createNode(puzzle, x, y, [], -1);
 
-  const value = getValue(firstNode);
-  const toStudy = { [value]: [firstNode] };
+	const toStudy = new Queue(firstNode, search);
   const studied: Set<string> = new Set();
 
   let createdNodes = 1;
@@ -39,9 +66,7 @@ export const astar = ({ puzzle, heuristic, search }: Props): Return => {
 
 	// its true here because we know the puzzle we got from above is solvable
   while (true) {
-
-    const minValue = getMinFromPool(toStudy);
-    const currentNode = toStudy[minValue].shift() as sNode;
+		const currentNode = toStudy.pop();
 
     allCurrentNodes--;
     maxNumNodes = Math.max(allCurrentNodes, maxNumNodes);
@@ -90,13 +115,7 @@ export const astar = ({ puzzle, heuristic, search }: Props): Return => {
       createdNodes++;
       allCurrentNodes++;
 
-      // value is either f(x), g(x) or h(x) depending on the search style (normal, uniform or greedy)
-      const value = getValue(newNode);
-
-      // if the pool is empty, create a new one, else, push the new created node to the pool
-      if (!toStudy[value]) toStudy[value] = [newNode];
-      else toStudy[value].push(newNode);
-
+			toStudy.insert(newNode);
     });
   }
 };

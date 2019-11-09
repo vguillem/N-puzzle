@@ -86,8 +86,13 @@ export const findEmptyBlock = (puzzle: Puzzle) => {
   return [];
 };
 
-export const getMinFromPool = (pool: { [x: number]: sNode[] }) =>
-  Math.min(...Object.keys(pool).map(Number));
+export const getMinFromPool = (pool: { [x: number]: sNode[] }) => {
+  let minValue = Infinity;
+  for (const key in pool) {
+    if (+key < minValue && pool[key].length) minValue = +key;
+  }
+  return minValue;
+};
 
 const clonePuzzle = (puzzle: Puzzle) => puzzle.map(line => line.slice());
 

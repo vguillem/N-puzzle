@@ -30,24 +30,20 @@ export const runOnce = (puzzle: Puzzle) => {
   const heuristics = initializeHeuristics(solved, config.size);
   console.log();
   logPuzzle(puzzle, config.size);
-  try {
-    config.algorithms.forEach(algorithm => {
-      config.heuristics.forEach(heuristic => {
-        config.search.forEach(search => {
-          computeOnce(
-            puzzle,
-            heuristics[heuristic],
-            heuristic,
-            algorithm,
-            search
-          );
-          logOnce(algorithm, heuristic, search, state);
-        });
+  config.algorithms.forEach(algorithm => {
+    config.heuristics.forEach(heuristic => {
+      config.search.forEach(search => {
+        computeOnce(
+          puzzle,
+          heuristics[heuristic],
+          heuristic,
+          algorithm,
+          search
+        );
+        logOnce(algorithm, heuristic, search, state);
       });
     });
-  } catch (e) {
-    console.error(e.message);
-  }
+  });
 };
 
 const computeOnce = (
@@ -58,7 +54,12 @@ const computeOnce = (
   search: searchStyle
 ) => {
   const time = Date.now();
-  const { node, nbStudiedNodes: numNodes, maxNumNodes, createdNodes } = algorithms[algorithm]({
+  const {
+    node,
+    nbStudiedNodes: numNodes,
+    maxNumNodes,
+    createdNodes
+  } = algorithms[algorithm]({
     puzzle: puzzle,
     heuristic,
     search
@@ -80,12 +81,8 @@ export const runBench = async () => {
     const puzzle = generatePuzzle(solved, 3);
     const heuristics = initializeHeuristics(solved, 3);
     config.heuristics.forEach(heuristic => {
-      try {
-        computeBench(puzzle, heuristics[heuristic], heuristic);
-        logBench(state);
-      } catch (e) {
-        console.error(e.message);
-      }
+      computeBench(puzzle, heuristics[heuristic], heuristic);
+      logBench(state);
     });
     await new Promise(r => setTimeout(r, 200));
   }
@@ -97,7 +94,11 @@ const computeBench = (
   type: heuristics
 ) => {
   const time = Date.now();
-  const { nbStudiedNodes: numNodes, maxNumNodes, createdNodes } = algorithms.astar({
+  const {
+    nbStudiedNodes: numNodes,
+    maxNumNodes,
+    createdNodes
+  } = algorithms.astar({
     puzzle: puzzle,
     heuristic,
     search: 'normal'

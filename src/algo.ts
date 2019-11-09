@@ -29,30 +29,22 @@ export const astar = ({ puzzle, heuristic, search }: Props): Return => {
   const firstNode = createNode(puzzle, x, y, [], -1);
 
   const value = getValue(firstNode);
-  // toStudy is a pool of node organized by value, which makes the sorting faster
-  // as we dont have to sort a whole array but only chunks of it
   const toStudy = { [value]: [firstNode] };
-  // we havent studied anything yet
-  const studied: { [id in string]: number } = {};
+  const studied: Set<string> = new Set();
 
-  // data
   let createdNodes = 1;
   let allCurrentNodes = 1;
   let nbStudiedNodes = 0;
   let maxNumNodes = 1;
 
-  while (Object.keys(toStudy).length) {
-    // we get the smallest value node
+	// its true here because we know the puzzle we got from above is solvable
+  while (true) {
+
     const minValue = getMinFromPool(toStudy);
     const currentNode = toStudy[minValue].shift() as sNode;
 
-    // as its an object, we must delete the key when its pool of node is empty
-    if (!toStudy[minValue].length) delete toStudy[minValue];
-
-    allCurrentNodes -= 1;
+    allCurrentNodes--;
     maxNumNodes = Math.max(allCurrentNodes, maxNumNodes);
-
-    nbStudiedNodes++;
 
     // if my heuristic is 0, i am done
     if (!currentNode.heuristic) {
@@ -64,9 +56,10 @@ export const astar = ({ puzzle, heuristic, search }: Props): Return => {
       };
     }
 
-    // add the value of the node to the studied pool, as the node has been studied here
-    const value = getValue(currentNode);
-    studied[currentNode.id] = value;
+    if (studied.has(currentNode.id)) continue;
+
+    studied.add(currentNode.id);
+    nbStudiedNodes++;
 
     const {
       path: prevPath,
@@ -95,21 +88,17 @@ export const astar = ({ puzzle, heuristic, search }: Props): Return => {
       );
 
       createdNodes++;
+      allCurrentNodes++;
 
       // value is either f(x), g(x) or h(x) depending on the search style (normal, uniform or greedy)
       const value = getValue(newNode);
-
-      // if node has already been studied and its value is less than the new node value, do not study the node
-      if (studied[newNode.id] && studied[newNode.id] <= value) return;
 
       // if the pool is empty, create a new one, else, push the new created node to the pool
       if (!toStudy[value]) toStudy[value] = [newNode];
       else toStudy[value].push(newNode);
 
-      allCurrentNodes += 1;
     });
   }
-  throw new Error('this puzzle cannot be solved');
 };
 
 const getGetter = {
@@ -188,7 +177,6 @@ export const idastar = ({ puzzle, heuristic, search }: Props): Return => {
             move
           );
 
-          // TODO: renaming ?
           createdNodes += 1;
 
           // we should study this node if its f(x) is less than the depth we are exploring

@@ -105,12 +105,13 @@ export const idastar = ({
   search,
   solvedId
 }: Props): Return => {
+  const getValue = getGetter[search];
   const createNode = getCreateNode[search](heuristic);
+  const createNewNodes = getCreateNewNodes(createNode);
 
   const [x, y] = findEmptyBlock(puzzle);
   const startHeuristic = heuristic(puzzle);
   let parentNode = initNode(startHeuristic, puzzle, x, y);
-  const getValue = getGetter[search];
 
   let maxDepth = getValue(parentNode);
 
@@ -142,51 +143,57 @@ export const idastar = ({
         };
       }
 
-      // we put the current node inside the studied pool
       studied[currentNode.id] = getValue(currentNode);
 
-      const {
-        path: prevPath,
-        level: prevLevel,
-        x: prevX,
-        y: prevY,
-        puzzle: prevPuzzle
-      } = currentNode;
+      const mapper = createNewNodes(currentNode);
+      const { path, y, x } = currentNode;
+      const lastMove: Move = path[path.length - 1];
 
-      const lastMove: Move = prevPath[prevPath.length - 1];
-
-      const newNodes = ((['up', 'left', 'right', 'down'] as Move[])
-        .map(move => {
+      const filteredMoves = (['up', 'left', 'right', 'down'] as Move[]).filter(
+        move => {
           const badMove = badMoves.has(`${lastMove}|${move}`);
-          const shouldNotMove = wrongMove[move](prevX, prevY, config.size);
-          if (badMove || shouldNotMove) return null;
+          const shouldNotMove = wrongMove[move](x, y, config.size);
+          return !(badMove || shouldNotMove);
+        }
+      );
 
-          const newPuzzle = prevPuzzle.map(l => l.slice());
-          const [newX, newY] = switcher[move](newPuzzle, prevX, prevY);
-          const newNode = createNode(
-            newPuzzle,
-            newX,
-            newY,
-            prevPath,
-            move,
-            prevLevel
-          );
+      const threadedNodes = filteredMoves.map(mapper);
 
-          createdNodes += 1;
+      createdNodes += threadedNodes.length;
 
+      const newNodes = threadedNodes
+        .map(newNode => {
           const value = getValue(newNode);
+
           if (value <= maxDepth) {
-            if (studied[newNode.id] && studied[newNode.id] <= value)
-              return null;
-            return newNode;
+            return studied[newNode.id] && studied[newNode.id] <= value
+              ? null
+              : newNode;
           }
+
           nextMaxDepth = Math.min(nextMaxDepth, value);
           return null;
         })
-        .filter(Boolean) as sNode[]).sort((a, b) => getValue(b) - getValue(a));
+        .filter(Boolean)
+        .sort((a, b) => getValue(b) - getValue(a));
 
       toStudy.push(...newNodes);
     }
     maxDepth = nextMaxDepth;
   }
+};
+
+const getCreateNewNodes = (createNode: any) => (prevNode: sNode) => {
+  const {
+    path: prevPath,
+    level: prevLevel,
+    x: prevX,
+    y: prevY,
+    puzzle: prevPuzzle
+  } = prevNode;
+  return (move: Move) => {
+    const newPuzzle = prevPuzzle.map(l => l.slice());
+    const [newX, newY] = switcher[move](newPuzzle, prevX, prevY);
+    return createNode(newPuzzle, newX, newY, prevPath, move, prevLevel);
+  };
 };

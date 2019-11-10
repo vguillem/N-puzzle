@@ -4,6 +4,7 @@ import { initializeHeuristics } from './heuristics';
 import { logOnce, logBench, logPuzzle } from './logger';
 import { config } from './config';
 import { getAllSteps } from './utils';
+import { useWorker } from './worker';
 
 const generateEmptyState = () => ({
   solveTime: 0,
@@ -25,28 +26,45 @@ const state: State = {
   combined: generateEmptyState()
 };
 
-export const runOnce = (puzzle: Puzzle) => {
+export const runOnce = async(puzzle: Puzzle) => {
   const solved = generateSolvedPuzzle(config.size);
-  const heuristics = initializeHeuristics(solved, config.size);
+  //const heuristics = initializeHeuristics(solved, config.size);
+  const promises: any = [];
   console.log();
   logPuzzle(puzzle, config.size);
   config.algorithms.forEach(algorithm => {
     config.heuristics.forEach(heuristic => {
-      config.search.forEach(search => {
-        computeOnce(
-          puzzle,
-          heuristics[heuristic],
-          heuristic,
-          algorithm,
-          search
+      config.search.forEach((search) => {
+        // computeOnce(
+        //         //   puzzle,
+        //         //   heuristics[heuristic],
+        //         //   heuristic,
+        //         //   algorithm,
+        //         //   search
+        //         // );
+        //         // logOnce(algorithm, heuristic, search, state);
+        promises.push(
+          useWorker(
+            solved,
+            puzzle,
+            heuristic,
+            algorithm,
+            search,
+            config
+          )
         );
-        logOnce(algorithm, heuristic, search, state);
       });
     });
   });
+
+  await Promise.all(promises).then(()=> {
+    console.log('end')
+  }).catch(err => {
+    console.log(err)
+  })
 };
 
-const computeOnce = (
+export const computeOnce = (
   puzzle: Puzzle,
   heuristic: Heuristic,
   type: heuristics,
@@ -68,11 +86,13 @@ const computeOnce = (
   if (config.showSteps) {
     state[type].steps = getAllSteps(puzzle, node.path);
   }
+  //console.log('solve',solveTime)
   state[type].solveTime = solveTime;
   state[type].createdNodes = createdNodes;
   state[type].nbStudiedNodes = numNodes;
   state[type].maxNumNodes = maxNumNodes;
   state[type].path = node.path;
+  logOnce(algorithm, type, search, state)
 };
 
 export const runBench = async () => {

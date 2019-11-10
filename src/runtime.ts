@@ -4,6 +4,7 @@ import { initializeHeuristics } from './heuristics';
 import { logOnce, logBench, logPuzzle } from './logger';
 import { config } from './config';
 import { getAllSteps } from './utils';
+import { useLaunchWorker } from './worker';
 
 const generateEmptyState = () => ({
   solveTime: 0,
@@ -27,56 +28,51 @@ const state: State = {
 
 export const runOnce = (puzzle: Puzzle) => {
   const solved = generateSolvedPuzzle(config.size);
-  const solvedId = solved.flat().join('|');
-  const heuristics = initializeHeuristics(solved, config.size);
+
   console.log();
   logPuzzle(puzzle, config.size);
+
+  const promises: Array<Promise<{ data: AlgorithmData }>> = [];
+
   config.algorithms.forEach(algorithm => {
     config.heuristics.forEach(heuristic => {
       config.search.forEach(search => {
-        computeOnce(
-          puzzle,
-          heuristics[heuristic],
-          heuristic,
-          algorithm,
-          search,
-          solvedId
+        promises.push(
+          useLaunchWorker({
+            type: heuristic,
+            size: config.size,
+            solved,
+            puzzle,
+            algorithm,
+            search
+          })
         );
-        logOnce(algorithm, heuristic, search, state);
       });
     });
   });
-};
 
-const computeOnce = (
-  puzzle: Puzzle,
-  heuristic: Heuristic,
-  type: heuristics,
-  algorithm: algorithms,
-  search: searchStyle,
-  solvedId: string
-) => {
-  const time = Date.now();
-  const {
-    node,
-    nbStudiedNodes: numNodes,
-    maxNumNodes,
-    createdNodes
-  } = algorithms[algorithm]({
-    puzzle: puzzle,
-    heuristic,
-    search,
-    solvedId
-  });
-  const solveTime = Date.now() - time;
-  if (config.showSteps) {
-    state[type].steps = getAllSteps(puzzle, node.path);
-  }
-  state[type].solveTime = solveTime;
-  state[type].createdNodes = createdNodes;
-  state[type].nbStudiedNodes = numNodes;
-  state[type].maxNumNodes = maxNumNodes;
-  state[type].path = node.path;
+  Promise.all(promises).then(res => {
+    res.forEach(r => {
+      const {
+        solveTime,
+        createdNodes,
+        numNodes,
+        maxNumNodes,
+        node,
+        algorithm,
+        heuristic,
+        search
+      } = r.data;
+      if (config.showSteps)
+        state[heuristic].steps = getAllSteps(puzzle, node.path);
+      state[heuristic].solveTime = solveTime;
+      state[heuristic].createdNodes = createdNodes;
+      state[heuristic].nbStudiedNodes = numNodes;
+      state[heuristic].maxNumNodes = maxNumNodes;
+      state[heuristic].path = node.path;
+      logOnce(algorithm, heuristic, search, state);
+    });
+  }).catch(e => { console.log(e) });
 };
 
 export const runBench = async () => {
@@ -108,7 +104,8 @@ const computeBench = (
     puzzle: puzzle,
     heuristic,
     search: 'normal',
-    solvedId
+    solvedId,
+    size: config.size
   });
   const solveTime = Date.now() - time;
   state[type].allSolvedTimes.push(solveTime);

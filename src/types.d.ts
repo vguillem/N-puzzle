@@ -13,6 +13,17 @@ interface sNode {
   total: number;
 }
 
+interface AlgorithmData {
+  solveTime: number;
+  createdNodes: number;
+  numNodes: number;
+  maxNumNodes: number;
+  node: sNode;
+  algorithm: algorithms;
+  heuristic: heuristics;
+  search: searchStyle;
+}
+
 type Pool = { [id in string]: sNode };
 
 type heuristics =

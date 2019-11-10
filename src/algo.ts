@@ -8,13 +8,13 @@ import {
   Queue,
   initNode
 } from './utils';
-import { config } from './config';
 
 interface Props {
   puzzle: Puzzle;
   heuristic: Heuristic;
   search: searchStyle;
   solvedId: string;
+  size: number;
 }
 
 interface Return {
@@ -28,7 +28,8 @@ export const astar = ({
   puzzle,
   heuristic,
   search,
-  solvedId
+  solvedId,
+  size
 }: Props): Return => {
   const createNode = getCreateNode[search](heuristic);
 
@@ -77,7 +78,7 @@ export const astar = ({
 
     (['up', 'left', 'right', 'down'] as Move[]).forEach(move => {
       const badMove = badMoves.has(`${lastMove}|${move}`);
-      const shouldNotMove = wrongMove[move](prevX, prevY, config.size);
+      const shouldNotMove = wrongMove[move](prevX, prevY, size);
       if (badMove || shouldNotMove) return;
 
       const newPuzzle = prevPuzzle.map(l => l.slice());
@@ -103,7 +104,8 @@ export const idastar = ({
   puzzle,
   heuristic,
   search,
-  solvedId
+  solvedId,
+  size
 }: Props): Return => {
   const getValue = getGetter[search];
   const createNode = getCreateNode[search](heuristic);
@@ -152,7 +154,7 @@ export const idastar = ({
       const filteredMoves = (['up', 'left', 'right', 'down'] as Move[]).filter(
         move => {
           const badMove = badMoves.has(`${lastMove}|${move}`);
-          const shouldNotMove = wrongMove[move](x, y, config.size);
+          const shouldNotMove = wrongMove[move](x, y, size);
           return !(badMove || shouldNotMove);
         }
       );

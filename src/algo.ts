@@ -5,7 +5,8 @@ import {
   getCreateNode,
   getGetter,
   findEmptyBlock,
-  Queue
+  Queue,
+  initNode
 } from './utils';
 import { config } from './config';
 
@@ -13,6 +14,7 @@ interface Props {
   puzzle: Puzzle;
   heuristic: Heuristic;
   search: searchStyle;
+  solvedId: string;
 }
 
 interface Return {
@@ -22,11 +24,17 @@ interface Return {
   maxNumNodes: number;
 }
 
-export const astar = ({ puzzle, heuristic, search }: Props): Return => {
-  const createNode = getCreateNode(heuristic);
+export const astar = ({
+  puzzle,
+  heuristic,
+  search,
+  solvedId
+}: Props): Return => {
+  const createNode = getCreateNode[search](heuristic);
 
   const [x, y] = findEmptyBlock(puzzle);
-  const firstNode = createNode(puzzle, x, y, [], -1);
+  const startHeuristic = heuristic(puzzle);
+  const firstNode = initNode(startHeuristic, puzzle, x, y);
 
   const toStudy = new Queue(firstNode, search);
   const studied: Set<string> = new Set();
@@ -38,13 +46,12 @@ export const astar = ({ puzzle, heuristic, search }: Props): Return => {
 
   // its true here because we know the puzzle we got from above is solvable
   while (true) {
-    const currentNode = toStudy.pop();
-
-    allCurrentNodes--;
     maxNumNodes = Math.max(allCurrentNodes, maxNumNodes);
 
-    // if my heuristic is 0, i am done
-    if (!currentNode.heuristic) {
+    const currentNode = toStudy.pop();
+    allCurrentNodes--;
+
+    if (currentNode.id === solvedId) {
       return {
         node: currentNode,
         createdNodes,
@@ -80,8 +87,8 @@ export const astar = ({ puzzle, heuristic, search }: Props): Return => {
         newX,
         newY,
         prevPath,
-        prevLevel,
-        move
+        move,
+        prevLevel
       );
 
       createdNodes++;
@@ -92,11 +99,17 @@ export const astar = ({ puzzle, heuristic, search }: Props): Return => {
   }
 };
 
-export const idastar = ({ puzzle, heuristic, search }: Props): Return => {
-  const createNode = getCreateNode(heuristic);
+export const idastar = ({
+  puzzle,
+  heuristic,
+  search,
+  solvedId
+}: Props): Return => {
+  const createNode = getCreateNode[search](heuristic);
 
   const [x, y] = findEmptyBlock(puzzle);
-  let parentNode = createNode(puzzle, x, y, [], -1);
+  const startHeuristic = heuristic(puzzle);
+  let parentNode = initNode(startHeuristic, puzzle, x, y);
   const getValue = getGetter[search];
 
   let maxDepth = getValue(parentNode);
@@ -120,8 +133,7 @@ export const idastar = ({ puzzle, heuristic, search }: Props): Return => {
 
       nbStudiedNodes += 1;
 
-      // if my heuristic is 0 then we are done
-      if (!currentNode.heuristic) {
+      if (currentNode.id === solvedId) {
         return {
           node: currentNode,
           createdNodes,
@@ -156,8 +168,8 @@ export const idastar = ({ puzzle, heuristic, search }: Props): Return => {
             newX,
             newY,
             prevPath,
-            prevLevel,
-            move
+            move,
+            prevLevel
           );
 
           createdNodes += 1;

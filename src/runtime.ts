@@ -27,6 +27,7 @@ const state: State = {
 
 export const runOnce = (puzzle: Puzzle) => {
   const solved = generateSolvedPuzzle(config.size);
+  const solvedId = solved.flat().join('|');
   const heuristics = initializeHeuristics(solved, config.size);
   console.log();
   logPuzzle(puzzle, config.size);
@@ -38,7 +39,8 @@ export const runOnce = (puzzle: Puzzle) => {
           heuristics[heuristic],
           heuristic,
           algorithm,
-          search
+          search,
+          solvedId
         );
         logOnce(algorithm, heuristic, search, state);
       });
@@ -51,7 +53,8 @@ const computeOnce = (
   heuristic: Heuristic,
   type: heuristics,
   algorithm: algorithms,
-  search: searchStyle
+  search: searchStyle,
+  solvedId: string
 ) => {
   const time = Date.now();
   const {
@@ -62,7 +65,8 @@ const computeOnce = (
   } = algorithms[algorithm]({
     puzzle: puzzle,
     heuristic,
-    search
+    search,
+    solvedId
   });
   const solveTime = Date.now() - time;
   if (config.showSteps) {
@@ -78,10 +82,11 @@ const computeOnce = (
 export const runBench = async () => {
   while (true) {
     const solved = generateSolvedPuzzle(3);
+    const solvedId = solved.flat().join('|');
     const puzzle = generatePuzzle(solved, 3);
     const heuristics = initializeHeuristics(solved, 3);
     config.heuristics.forEach(heuristic => {
-      computeBench(puzzle, heuristics[heuristic], heuristic);
+      computeBench(puzzle, heuristics[heuristic], heuristic, solvedId);
       logBench(state);
     });
     await new Promise(r => setTimeout(r, 200));
@@ -91,7 +96,8 @@ export const runBench = async () => {
 const computeBench = (
   puzzle: Puzzle,
   heuristic: Heuristic,
-  type: heuristics
+  type: heuristics,
+  solvedId: string
 ) => {
   const time = Date.now();
   const {
@@ -101,7 +107,8 @@ const computeBench = (
   } = algorithms.astar({
     puzzle: puzzle,
     heuristic,
-    search: 'normal'
+    search: 'normal',
+    solvedId
   });
   const solveTime = Date.now() - time;
   state[type].allSolvedTimes.push(solveTime);

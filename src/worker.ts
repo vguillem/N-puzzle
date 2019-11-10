@@ -1,35 +1,31 @@
-'use strict';
+import { parentPort, workerData, Worker, isMainThread } from 'worker_threads';
+import { initializeHeuristics } from './heuristics';
+import { computeOnce } from './runtime';
 
-import * as algorithms from './algo';
+interface Params {
+  solved: Puzzle;
+  solvedId: string;
+  puzzle: Puzzle;
+  type: heuristics;
+  algorithm: algorithms;
+  search: searchStyle;
+  size: number;
+}
 
-console.log('init');
-const { logOnce } = require('../dist/logger');
-
-const { initializeHeuristics } = require('./heuristics');
-const { computeOnce } = require('./runtime');
-
-const { parentPort, workerData, Worker, isMainThread  } = require('worker_threads');
-
-export const useWorker = (
-  solved: Puzzle,
-  puzzle: Puzzle,
-  type: heuristics,
-  algorithm: algorithms,
-  search: searchStyle,
-  config:any
-) => {
+export const useWorker = (workerData: Params) => {
   return new Promise((resolve, reject) => {
-
-    const worker = new Worker(__filename, {workerData: {config, solved, puzzle, algorithm, type, search}});
-    worker.once('online', () => { console.log('Launching intensive CPU task') });
+    const worker = new Worker(__filename, { workerData });
+    worker.once('online', () => {
+      console.log('Launching intensive CPU task');
+    });
 
     worker.once('error', (error: any) => {
-      console.log('error worker', error)
+      console.log('error worker', error);
     });
 
     worker.once('exit', reject);
 
-    worker.once('message', (data:any) => {
+    worker.once('message', (data: any) => {
       console.log('end worker', data);
       // @ts-ignore
       //logOnce(...data);
@@ -37,23 +33,23 @@ export const useWorker = (
         resolve(true);
       }
     });
-  })
-
+  });
 };
 
 if (!isMainThread) {
-  const {config, solved, puzzle,type,algorithm,search} = workerData ;
-
-  const heuristics = initializeHeuristics(solved, config.size);
-  const heuristic = heuristics[type];
-  computeOnce(
+  const {
+    size,
+    solvedId,
+    solved,
     puzzle,
-    heuristic,
     type,
     algorithm,
     search
-  );
+  } = workerData as Params;
 
-  parentPort.postMessage({end: true});
+  const heuristics = initializeHeuristics(solved, size);
+  const heuristic = heuristics[type];
+  computeOnce(puzzle, heuristic, type, algorithm, search, solvedId);
 
+  if (parentPort) parentPort.postMessage({ end: true });
 }

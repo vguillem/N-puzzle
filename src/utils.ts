@@ -54,28 +54,78 @@ export const badMoves = new Set([
   'down|up'
 ]);
 
-export const getCreateNode = (heuristic: Heuristic) => (
+export const initNode = (
+  heuristic: number,
   puzzle: Puzzle,
   x: number,
-  y: number,
-  prevPath: Move[],
-  prevLevel: number,
-  move?: Move
-): sNode => {
-  const h = heuristic(puzzle);
-  const newPath = prevPath.slice();
-  const newLevel = prevLevel + 1;
-  if (move) newPath.push(move);
-  return {
-    id: puzzle.flat().join('|'),
-    heuristic: h,
-    total: h + newLevel,
-    path: newPath,
-    level: newLevel,
-    puzzle,
-    x,
-    y
-  };
+  y: number
+): sNode => ({
+  id: puzzle.flat().join('|'),
+  path: [],
+  total: heuristic,
+  level: 0,
+  heuristic,
+  puzzle,
+  x,
+  y
+});
+
+export const getCreateNode: {
+  [search in searchStyle]: (
+    h: Heuristic
+  ) => (
+    puzzle: Puzzle,
+    x: number,
+    y: number,
+    prevPath: Move[],
+    move: Move,
+    prevLevel: number
+  ) => sNode;
+} = {
+  greedy: heuristic => (puzzle, x, y, prevPath, move) => {
+    const h = heuristic(puzzle);
+    const newPath = prevPath.slice();
+    newPath.push(move);
+    return {
+      id: puzzle.flat().join('|'),
+      heuristic: h,
+      level: 0,
+      total: 0,
+      path: newPath,
+      puzzle,
+      x,
+      y
+    };
+  },
+  uniform: _ => (puzzle, x, y, prevPath, move, prevLevel) => {
+    const newPath = prevPath.slice();
+    newPath.push(move);
+    return {
+      id: puzzle.flat().join('|'),
+      heuristic: 0,
+      level: prevLevel + 1,
+      total: 0,
+      path: newPath,
+      puzzle,
+      x,
+      y
+    };
+  },
+  normal: heuristic => (puzzle, x, y, prevPath, move, prevLevel) => {
+    const h = heuristic(puzzle);
+    const newPath = prevPath.slice();
+    newPath.push(move);
+    return {
+      id: puzzle.flat().join('|'),
+      heuristic: h,
+      level: prevLevel + 1,
+      total: h + prevLevel + 1,
+      path: newPath,
+      puzzle,
+      x,
+      y
+    };
+  }
 };
 
 export const findEmptyBlock = (puzzle: Puzzle) => {
@@ -139,7 +189,8 @@ export class Queue {
 
   public pop(): sNode {
     const node = this.pool[this.smallestPool].pop() as sNode;
-    if (!this.pool[this.smallestPool].length) this.smallestPool = getMinFromPool(this.pool);
+    if (!this.pool[this.smallestPool].length)
+      this.smallestPool = getMinFromPool(this.pool);
     return node;
   }
 
@@ -159,9 +210,8 @@ export class Queue {
 
   private findNodeIndex(stack: sNode[], value: number) {
     let i;
-    for (i = stack.length - 1; i > 0; i--) {
-      if (this.getPlacementValue(stack[i]) > value) break;
-    }
+    for (i = stack.length - 1; i > 0; i--)
+      if (this.getPlacementValue(stack[i]) > value) return i;
     return i;
   }
 }

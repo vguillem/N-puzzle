@@ -56,11 +56,15 @@ ${blue}min:                 ${reset}${formatNode(getMin(state.allCreatedNodes))}
 ${blue}max:                 ${reset}${formatNode(getMax(state.allCreatedNodes))}
 
    ${violet} ALL EXPLORED NODES ${reset}
-${blue}average:             ${reset}${formatNode(getAvg(state.allNbStudiedNodes))}
+${blue}average:             ${reset}${formatNode(
+    getAvg(state.allNbStudiedNodes)
+  )}
 ${blue}standard deviation:  ${reset}${formatNode(
     getStandardDeviation(state.allNbStudiedNodes)
   )}
-${blue}min:                 ${reset}${formatNode(getMin(state.allNbStudiedNodes))}
+${blue}min:                 ${reset}${formatNode(
+    getMin(state.allNbStudiedNodes)
+  )}
 ${blue}max:                 ${reset}${formatNode(
     getMax(state.allNbStudiedNodes)
   )}`.trim();

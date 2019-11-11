@@ -25,8 +25,8 @@ export const printConfig = () => {
   console.log(
     `
 ${blue}heuristics:  ${white}${config.heuristics.join(',')}${reset}
-${green}algorithms:  ${white}${config.algorithms.join(',')}
-${yellow}searches:    ${white}${config.search.join(',')}
+${green}algorithms:  ${white}${config.algorithms.join(',')}${reset}
+${yellow}searches:    ${white}${config.search.join(',')}${reset}
 ${purple}puzzle size: ${white}${config.size}${reset}
 `.trim()
   );

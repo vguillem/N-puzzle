@@ -51,28 +51,32 @@ export const runOnce = (puzzle: Puzzle) => {
     });
   });
 
-  Promise.all(promises).then(res => {
-    res.forEach(r => {
-      const {
-        solveTime,
-        createdNodes,
-        numNodes,
-        maxNumNodes,
-        node,
-        algorithm,
-        heuristic,
-        search
-      } = r.data;
-      if (config.showSteps)
-        state[heuristic].steps = getAllSteps(puzzle, node.path);
-      state[heuristic].solveTime = solveTime;
-      state[heuristic].createdNodes = createdNodes;
-      state[heuristic].nbStudiedNodes = numNodes;
-      state[heuristic].maxNumNodes = maxNumNodes;
-      state[heuristic].path = node.path;
-      logOnce(algorithm, heuristic, search, state);
+  Promise.all(promises)
+    .then(res => {
+      res.forEach(r => {
+        const {
+          solveTime,
+          createdNodes,
+          numNodes,
+          maxNumNodes,
+          node,
+          algorithm,
+          heuristic,
+          search
+        } = r.data;
+        if (config.showSteps)
+          state[heuristic].steps = getAllSteps(puzzle, node.path);
+        state[heuristic].solveTime = solveTime;
+        state[heuristic].createdNodes = createdNodes;
+        state[heuristic].nbStudiedNodes = numNodes;
+        state[heuristic].maxNumNodes = maxNumNodes;
+        state[heuristic].path = node.path;
+        logOnce(algorithm, heuristic, search, state);
+      });
+    })
+    .catch(e => {
+      console.log(e);
     });
-  }).catch(e => { console.log(e) });
 };
 
 export const runBench = async () => {
@@ -100,7 +104,7 @@ const computeBench = (
     nbStudiedNodes: numNodes,
     maxNumNodes,
     createdNodes
-  } = algorithms.astar({
+  } = algorithms[config.algorithms[0]]({
     puzzle: puzzle,
     heuristic,
     search: 'normal',

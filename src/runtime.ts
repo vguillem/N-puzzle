@@ -4,7 +4,7 @@ import { initializeHeuristics } from './heuristics';
 import { logOnce, logBench, logPuzzle } from './logger';
 import { config } from './config';
 import { getAllSteps } from './utils';
-import { useLaunchWorker } from './worker';
+import { useWorker } from './worker';
 
 const generateEmptyState = () => ({
   solveTime: 0,
@@ -38,7 +38,7 @@ export const runOnce = (puzzle: Puzzle) => {
     config.heuristics.forEach(heuristic => {
       config.search.forEach(search => {
         promises.push(
-          useLaunchWorker({
+          useWorker({
             type: heuristic,
             size: config.size,
             solved,

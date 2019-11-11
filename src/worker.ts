@@ -10,7 +10,7 @@ interface Params {
   size: number;
 }
 
-export const useLaunchWorker = (
+export const useWorker = (
   workerData: Params
 ): Promise<{ data: AlgorithmData }> => {
   return new Promise((resolve, reject) => {

@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node-dev -P ./tsconfig.json ./src/index.ts",
+    "launch": "tsc -p ./tsconfig.json && node dist/index.js",
     "build": "tsc -p ./tsconfig.json"
   },
   "repository": {

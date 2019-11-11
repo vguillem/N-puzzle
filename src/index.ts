@@ -19,6 +19,7 @@ ${green}--algorithms ${reset}   list of coma (',') separated algorithms (astar,i
 ${green}--search     ${reset}   list of coma (',') separated search (normal,greedy,uniform)
 ${green}--heuristics ${reset}   list of coma (',') separated heuristics (manhattan,hamming,linearConflict,cornerTile,combined)
 ${green}--showSteps  ${reset}   shows all steps from the resolved path
+${green}--enableWorkers${reset} enable workers to run multiple runtimes in parallel
 
 ${green}--bench      ${reset}   run the app in a loop and display benchmark:
 ${reset}             ${reset}   this will run with the astar algorithm on a 3x3 puzzle
@@ -102,6 +103,10 @@ it will only work with the astar algorithm`
 
 if ((index = args.indexOf('--showSteps')) !== -1) {
   config.showSteps = true;
+}
+
+if ((index = args.indexOf('--enableWorkers')) !== -1) {
+  config.enableWorkers = true;
 }
 
 if (args.includes('--bench')) {

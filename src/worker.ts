@@ -12,7 +12,7 @@ interface Params {
 
 export const useWorker = (
   workerData: Params
-): Promise<{ data: AlgorithmData }> => {
+): Promise<AlgorithmData> => {
   return new Promise((resolve, reject) => {
     const worker = new Worker(__filename, { workerData });
 
@@ -26,7 +26,7 @@ export const useWorker = (
 
     worker.once('exit', reject);
 
-    worker.once('message', (data: { data: AlgorithmData }) => {
+    worker.once('message', (data: AlgorithmData) => {
       resolve(data);
     });
   });
@@ -34,5 +34,5 @@ export const useWorker = (
 
 if (!isMainThread) {
   const data: AlgorithmData = computeOnce(workerData);
-  if (parentPort) parentPort.postMessage({ data });
+  if (parentPort) parentPort.postMessage(data);
 }

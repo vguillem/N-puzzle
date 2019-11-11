@@ -1,4 +1,4 @@
-NAME= n-puzzle
+NAME= N-puzzle
 
 SRCDIR = src
 

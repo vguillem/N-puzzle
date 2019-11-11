@@ -5,6 +5,7 @@ import { logOnce, logBench, logPuzzle } from './logger';
 import { config } from './config';
 import { getAllSteps } from './utils';
 import { useWorker } from './worker';
+import { computeOnce } from './compute';
 
 const generateEmptyState = () => ({
   solveTime: 0,
@@ -32,51 +33,66 @@ export const runOnce = (puzzle: Puzzle) => {
   console.log();
   logPuzzle(puzzle, config.size);
 
-  const promises: Array<Promise<{ data: AlgorithmData }>> = [];
+  const promises: Array<Promise<AlgorithmData>> = [];
+  const values: AlgorithmData[] = [];
 
   config.algorithms.forEach(algorithm => {
     config.heuristics.forEach(heuristic => {
       config.search.forEach(search => {
-        promises.push(
-          useWorker({
-            type: heuristic,
-            size: config.size,
-            solved,
-            puzzle,
-            algorithm,
-            search
-          })
-        );
+        if (config.enableWorkers) {
+          promises.push(
+            useWorker({
+              type: heuristic,
+              size: config.size,
+              solved,
+              puzzle,
+              algorithm,
+              search
+            })
+          );
+        } else {
+          updateAndLog(puzzle)(
+            computeOnce({
+              solved,
+              puzzle,
+              type: heuristic,
+              algorithm,
+              search,
+              size: config.size
+            })
+          );
+        }
       });
     });
   });
 
-  Promise.all(promises)
-    .then(res => {
-      res.forEach(r => {
-        const {
-          solveTime,
-          createdNodes,
-          numNodes,
-          maxNumNodes,
-          node,
-          algorithm,
-          heuristic,
-          search
-        } = r.data;
-        if (config.showSteps)
-          state[heuristic].steps = getAllSteps(puzzle, node.path);
-        state[heuristic].solveTime = solveTime;
-        state[heuristic].createdNodes = createdNodes;
-        state[heuristic].nbStudiedNodes = numNodes;
-        state[heuristic].maxNumNodes = maxNumNodes;
-        state[heuristic].path = node.path;
-        logOnce(algorithm, heuristic, search, state);
+  if (config.enableWorkers) {
+    Promise.all(promises)
+      .then(res => res.forEach(updateAndLog(puzzle)))
+      .catch(e => {
+        console.log(e);
       });
-    })
-    .catch(e => {
-      console.log(e);
-    });
+  }
+};
+
+const updateAndLog = (puzzle: Puzzle) => (value: AlgorithmData) => {
+  const {
+    solveTime,
+    createdNodes,
+    numNodes,
+    maxNumNodes,
+    node,
+    algorithm,
+    heuristic,
+    search
+  } = value;
+  if (config.showSteps) state[heuristic].steps = getAllSteps(puzzle, node.path);
+  state[heuristic].solveTime = solveTime;
+  state[heuristic].createdNodes = createdNodes;
+  state[heuristic].nbStudiedNodes = numNodes;
+  state[heuristic].maxNumNodes = maxNumNodes;
+  state[heuristic].path = node.path;
+  logOnce(algorithm, heuristic, search, state);
 };
 
 export const runBench = async () => {
@@ -100,11 +116,9 @@ const computeBench = (
   solvedId: string
 ) => {
   const time = Date.now();
-  const {
-    nbStudiedNodes: numNodes,
-    maxNumNodes,
-    createdNodes
-  } = algorithms[config.algorithms[0]]({
+  const { nbStudiedNodes: numNodes, maxNumNodes, createdNodes } = algorithms[
+    config.algorithms[0]
+  ]({
     puzzle: puzzle,
     heuristic,
     search: 'normal',

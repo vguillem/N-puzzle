@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "ts-node-dev -P ./tsconfig.json ./src/index.ts",
+    "launch": "tsc -p ./tsconfig.json && node dist/index.js",
+    "build": "tsc -p ./tsconfig.json"
   },
   "repository": {
     "type": "git",
@@ -15,5 +17,11 @@
   "bugs": {
     "url": "https://github.com/vguillem/N-puzzle/issues"
   },
-  "homepage": "https://github.com/vguillem/N-puzzle#readme"
+  "homepage": "https://github.com/vguillem/N-puzzle#readme",
+  "devDependencies": {
+    "@types/node": "^12.12.5",
+    "ts-node": "^8.4.1",
+    "ts-node-dev": "^1.0.0-pre.43",
+    "typescript": "^3.6.4"
+  }
 }
